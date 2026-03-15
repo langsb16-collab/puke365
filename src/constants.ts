@@ -139,6 +139,7 @@ export const LOCALIZATION: Record<Language, Record<string, string>> = {
     style_tight_aggressive: 'Tight-Aggressive',
     style_loose: 'Loose',
     style_analytical: 'Analytical',
+    exitGame: 'Exit Game',
   },
   ko: {
     lobby: '로비',
@@ -246,6 +247,7 @@ export const LOCALIZATION: Record<Language, Record<string, string>> = {
     style_tight_aggressive: '타이트-어그레시브',
     style_loose: '루즈',
     style_analytical: '분석적',
+    exitGame: '게임 나가기',
   },
   zh: {
     lobby: '大厅',
@@ -353,5 +355,6 @@ export const LOCALIZATION: Record<Language, Record<string, string>> = {
     style_tight_aggressive: '紧凶型',
     style_loose: '松散型',
     style_analytical: '分析型',
+    exitGame: '离开牌桌',
   },
 };

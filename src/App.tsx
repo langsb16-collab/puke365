@@ -886,7 +886,16 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="h-24 bg-neutral-900 border-t border-white/10 px-6 flex items-center justify-between z-50">
+      <footer className="h-24 bg-neutral-900 border-t border-white/10 px-6 flex items-center justify-between z-50 relative">
+        {/* Exit Game Button - Top Right of Footer */}
+        <button 
+          onClick={() => initGame('lobby')}
+          className="absolute -top-16 right-6 px-6 py-3 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-700 hover:to-neutral-800 text-white/80 hover:text-white rounded-xl border-2 border-[#d4af37] font-bold uppercase tracking-wider text-sm transition-all shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          {t('exitGame')}
+        </button>
+
         <div className="flex items-center gap-6">
           <div className="flex flex-col">
             <span className="text-[10px] text-white/40 uppercase">{t('yourChips')}</span>
