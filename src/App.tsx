@@ -742,47 +742,50 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-yellow-500/30 overflow-hidden flex flex-col">
-      <header className="h-16 border-b border-white/10 bg-black/80 backdrop-blur-xl flex items-center justify-between px-8 z-50">
-        <div className="flex items-center gap-6">
-          <button onClick={() => initGame('lobby')} className="p-2 hover:bg-white/5 rounded-xl transition-colors text-white/40 hover:text-white">
-            <LayoutGrid size={20} />
+      {/* Responsive Header - Hidden on mobile, compact on tablet, full on desktop */}
+      <header className="h-12 md:h-14 lg:h-16 border-b border-white/10 bg-black/80 backdrop-blur-xl flex items-center justify-between px-3 md:px-6 lg:px-8 z-50">
+        <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
+          <button onClick={() => initGame('lobby')} className="p-1.5 md:p-2 hover:bg-white/5 rounded-xl transition-colors text-white/40 hover:text-white">
+            <LayoutGrid size={16} className="md:w-5 md:h-5" />
           </button>
-          <div className="h-8 w-px bg-white/10" />
+          <div className="h-6 md:h-8 w-px bg-white/10 hidden md:block" />
           <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-yellow-500">{t('jackpot')}</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            <div className="flex items-center gap-1 md:gap-2">
+              <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-yellow-500">{t('jackpot')}</span>
+              <div className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-red-500 animate-pulse" />
             </div>
-            <span className="text-lg font-black font-mono leading-none">1,245,890.00{t('currency')}</span>
+            <span className="text-sm md:text-base lg:text-lg font-black font-mono leading-none">1,245,890{t('currency')}</span>
           </div>
         </div>
 
         <div className="flex flex-col items-center">
-          <h1 className="text-[18px] font-black uppercase tracking-tighter text-[#d4af37] italic">WSOP ELITE</h1>
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{t('tournament')} • {t('table')} 01</span>
+          <h1 className="text-xs md:text-sm lg:text-[18px] font-black uppercase tracking-tighter text-[#d4af37] italic">WSOP ELITE</h1>
+          <div className="flex items-center gap-2 md:gap-3">
+            <span className="text-[8px] md:text-[10px] text-white/40 uppercase font-bold tracking-widest">{t('tournament')} • {t('table')} 01</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button onClick={() => setShowStandings(!showStandings)} className="p-2.5 bg-yellow-500/10 text-yellow-500 rounded-xl border border-yellow-500/20 hover:bg-yellow-500/20 transition-all">
-            <Trophy size={18} />
+        <div className="flex items-center gap-2 md:gap-4">
+          <button onClick={() => setShowStandings(!showStandings)} className="p-1.5 md:p-2 lg:p-2.5 bg-yellow-500/10 text-yellow-500 rounded-xl border border-yellow-500/20 hover:bg-yellow-500/20 transition-all">
+            <Trophy size={14} className="md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />
           </button>
-          <div className="h-8 w-px bg-white/10" />
-          <button className="p-2.5 bg-white/5 text-white/40 rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
-            <Settings size={18} />
+          <div className="h-6 md:h-8 w-px bg-white/10 hidden md:block" />
+          <button className="p-1.5 md:p-2 lg:p-2.5 bg-white/5 text-white/40 rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
+            <Settings size={14} className="md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />
           </button>
         </div>
       </header>
 
-      <main className="flex-1 relative flex items-center justify-center p-4">
-        {/* Chat System */}
-        <ChatSystem 
-          messages={chatMessages} 
-          onSendMessage={handleSendMessage} 
-          isOpen={isChatOpen} 
-          onClose={() => setIsChatOpen(false)} 
-        />
+      <main className="flex-1 relative flex items-center justify-center p-2 md:p-4">
+        {/* Chat System - Hidden on mobile, slide panel on tablet, fixed on desktop */}
+        <div className="hidden lg:block">
+          <ChatSystem 
+            messages={chatMessages} 
+            onSendMessage={handleSendMessage} 
+            isOpen={isChatOpen} 
+            onClose={() => setIsChatOpen(false)} 
+          />
+        </div>
 
         {/* Hand History Panel */}
         <div className="absolute left-6 top-6 bottom-6 w-64 bg-black/40 backdrop-blur-md border border-white/10 rounded-3xl z-40 p-4 flex flex-col hidden lg:flex">
@@ -845,44 +848,47 @@ export default function App() {
             ))}
           </div>
         </div>
-        <div className="relative w-full max-w-5xl aspect-[2/1] bg-[#1a3a2a] rounded-[200px] border-[12px] border-[#2a1a0a] shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-visible">
-          <div className="absolute inset-0 rounded-[188px] opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-          <div className="absolute inset-2 rounded-[180px] border-2 border-white/10 pointer-events-none" />
+        {/* Poker Table - Responsive sizing */}
+        <div className="relative w-full max-w-[95vw] md:max-w-4xl lg:max-w-5xl aspect-[16/10] md:aspect-[2/1] bg-[#1a3a2a] rounded-[100px] md:rounded-[150px] lg:rounded-[200px] border-[8px] md:border-[10px] lg:border-[12px] border-[#2a1a0a] shadow-[0_0_50px_rgba(0,0,0,0.8),inset_0_0_30px_rgba(0,0,0,0.5)] md:shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-visible">
+          <div className="absolute inset-0 rounded-[92px] md:rounded-[140px] lg:rounded-[188px] opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+          <div className="absolute inset-1 md:inset-2 rounded-[85px] md:rounded-[135px] lg:rounded-[180px] border-2 border-white/10 pointer-events-none" />
 
-          {/* Top Branding Logo */}
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none select-none z-0">
-            <span className="text-[18px] font-black uppercase tracking-tighter text-[#d4af37]/60 italic">WSOP ELITE</span>
-            <span className="text-[28px] font-black uppercase tracking-[6px] text-white/60 leading-none mt-1">CHUANQI PUKE</span>
+          {/* Top Branding Logo - Responsive sizing */}
+          <div className="absolute top-6 md:top-10 lg:top-12 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none select-none z-0">
+            <span className="text-[10px] md:text-sm lg:text-[18px] font-black uppercase tracking-tighter text-[#d4af37]/60 italic">WSOP ELITE</span>
+            <span className="text-base md:text-xl lg:text-[28px] font-black uppercase tracking-[3px] md:tracking-[5px] lg:tracking-[6px] text-white/60 leading-none mt-0.5 md:mt-1">CHUANQI PUKE</span>
           </div>
 
-          {/* Center Watermark (Faint) */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] select-none z-0">
+          {/* Center Watermark (Faint) - Hidden on mobile */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] select-none z-0 hidden md:flex">
             <div className="flex flex-col items-center">
-              <div className="relative scale-75">
-                <div className="flex gap-2 mb-2">
-                  <div className="w-12 h-16 bg-white/10 rounded-sm border border-white/20 rotate-[-15deg]" />
-                  <div className="w-12 h-16 bg-white/10 rounded-sm border border-white/20" />
-                  <div className="w-12 h-16 bg-white/10 rounded-sm border border-white/20 rotate-[15deg]" />
+              <div className="relative scale-50 md:scale-65 lg:scale-75">
+                <div className="flex gap-1 md:gap-2 mb-1 md:mb-2">
+                  <div className="w-8 h-12 md:w-10 md:h-14 lg:w-12 lg:h-16 bg-white/10 rounded-sm border border-white/20 rotate-[-15deg]" />
+                  <div className="w-8 h-12 md:w-10 md:h-14 lg:w-12 lg:h-16 bg-white/10 rounded-sm border border-white/20" />
+                  <div className="w-8 h-12 md:w-10 md:h-14 lg:w-12 lg:h-16 bg-white/10 rounded-sm border border-white/20 rotate-[15deg]" />
                 </div>
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                  <span className="text-4xl font-black tracking-tighter text-white/40 italic">CHUANQI PUKE</span>
+                <div className="absolute -bottom-3 md:-bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <span className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-white/40 italic">CHUANQI PUKE</span>
                 </div>
               </div>
-              <div className="mt-8 text-[10px] tracking-[0.3em] font-bold text-white/30 uppercase">{t('goForGold')}</div>
+              <div className="mt-4 md:mt-6 lg:mt-8 text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] font-bold text-white/30 uppercase">{t('goForGold')}</div>
             </div>
           </div>
 
-          <div className="flex gap-2 sm:gap-4 z-10">
+          {/* Community Cards - Responsive sizing */}
+          <div className="flex gap-1 sm:gap-2 md:gap-3 lg:gap-4 z-10">
             <AnimatePresence>
-              {gameState.communityCards.map((card, i) => <Card key={`community-${i}`} card={card} className="shadow-2xl" />)}
-              {Array.from({ length: 5 - gameState.communityCards.length }).map((_, i) => <div key={`empty-${i}`} className="w-12 h-16 sm:w-16 sm:h-24 rounded-lg border-2 border-white/5 bg-black/20" />)}
+              {gameState.communityCards.map((card, i) => <Card key={`community-${i}`} card={card} className="shadow-2xl w-10 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24" />)}
+              {Array.from({ length: 5 - gameState.communityCards.length }).map((_, i) => <div key={`empty-${i}`} className="w-10 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24 rounded-lg border-2 border-white/5 bg-black/20" />)}
             </AnimatePresence>
           </div>
 
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-16 flex flex-col items-center">
-            <div className="px-6 py-2 bg-black/80 backdrop-blur-xl rounded-2xl border border-yellow-500/30 shadow-[0_0_30px_rgba(234,179,8,0.2)]">
-              <div className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center mb-1">{t('pot')}</div>
-              <div className="text-xl font-black text-yellow-500 font-mono tracking-tighter">{gameState.pot.toLocaleString()}{t('currency')}</div>
+          {/* Pot Display - Responsive sizing */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-10 md:translate-y-12 lg:translate-y-16 flex flex-col items-center">
+            <div className="px-3 py-1.5 md:px-5 md:py-2 lg:px-6 lg:py-2 bg-black/80 backdrop-blur-xl rounded-xl md:rounded-2xl border border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.2)] md:shadow-[0_0_30px_rgba(234,179,8,0.2)]">
+              <div className="text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-white/40 text-center mb-0.5 md:mb-1">{t('pot')}</div>
+              <div className="text-sm md:text-lg lg:text-xl font-black text-yellow-500 font-mono tracking-tighter">{gameState.pot.toLocaleString()}{t('currency')}</div>
             </div>
           </div>
 
@@ -907,33 +913,36 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="h-24 bg-neutral-900 border-t border-white/10 px-6 flex items-center justify-between z-50 relative">
-        {/* Exit Game Button - Top Right of Footer */}
+      {/* Responsive Footer - Simplified on mobile, full on desktop */}
+      <footer className="h-20 md:h-22 lg:h-24 bg-neutral-900 border-t border-white/10 px-2 md:px-4 lg:px-6 flex items-center justify-between z-50 relative">
+        {/* Exit Game Button - Hidden on small mobile, visible on md+ */}
         <button 
           onClick={() => initGame('lobby')}
-          className="absolute -top-16 right-6 px-6 py-3 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-700 hover:to-neutral-800 text-white/80 hover:text-white rounded-xl border-2 border-[#d4af37] font-bold uppercase tracking-wider text-sm transition-all shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center gap-2"
+          className="hidden md:flex absolute -top-12 lg:-top-16 right-3 md:right-4 lg:right-6 px-3 py-2 md:px-5 md:py-2.5 lg:px-6 lg:py-3 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-700 hover:to-neutral-800 text-white/80 hover:text-white rounded-lg md:rounded-xl border-2 border-[#d4af37] font-bold uppercase tracking-wider text-xs md:text-sm transition-all shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] items-center gap-2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          {t('exitGame')}
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-4 md:h-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span className="hidden md:inline">{t('exitGame')}</span>
         </button>
 
-        <div className="flex items-center gap-6">
+        {/* Left: Chip Info - Compact on mobile */}
+        <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
           <div className="flex flex-col">
-            <span className="text-[10px] text-white/40 uppercase">{t('yourChips')}</span>
-            <span className="text-xl font-bold text-yellow-500 font-mono">{user.chips.toLocaleString()}{t('currency')}</span>
+            <span className="text-[8px] md:text-[9px] lg:text-[10px] text-white/40 uppercase">{t('yourChips')}</span>
+            <span className="text-base md:text-lg lg:text-xl font-bold text-yellow-500 font-mono">{user.chips.toLocaleString()}{t('currency')}</span>
           </div>
-          <div className="h-10 w-px bg-white/10" />
+          <div className="h-8 md:h-10 w-px bg-white/10" />
           <div className="flex flex-col">
-            <span className="text-[10px] text-white/40 uppercase">{t('currentBet')}</span>
-            <span className="text-xl font-bold text-white font-mono">{gameState.currentBet.toLocaleString()}{t('currency')}</span>
+            <span className="text-[8px] md:text-[9px] lg:text-[10px] text-white/40 uppercase">{t('currentBet')}</span>
+            <span className="text-base md:text-lg lg:text-xl font-bold text-white font-mono">{gameState.currentBet.toLocaleString()}{t('currency')}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Center: Action Buttons - Responsive sizing */}
+        <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3">
           <button 
             disabled={!isUserTurn} 
             onClick={() => handleAction('fold')} 
-            className="px-8 h-14 rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-lg transition-all active:scale-95 shadow-lg shadow-red-900/40 border-b-4 border-red-800"
+            className="px-3 md:px-6 lg:px-8 h-10 md:h-12 lg:h-14 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-xs md:text-base lg:text-lg transition-all active:scale-95 shadow-lg shadow-red-900/40 border-b-2 md:border-b-4 border-red-800"
           >
             {t('fold')}
           </button>
@@ -941,12 +950,13 @@ export default function App() {
           <button 
             disabled={!isUserTurn} 
             onClick={() => handleAction(gameState.currentBet === user.currentBet ? 'check' : 'call')} 
-            className="px-8 h-14 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-lg transition-all active:scale-95 shadow-lg shadow-blue-900/40 border-b-4 border-blue-800"
+            className="px-3 md:px-6 lg:px-8 h-10 md:h-12 lg:h-14 rounded-xl md:rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-xs md:text-base lg:text-lg transition-all active:scale-95 shadow-lg shadow-blue-900/40 border-b-2 md:border-b-4 border-blue-800"
           >
             {gameState.currentBet === user.currentBet ? t('check') : t('call')}
           </button>
           
-          <div className="flex flex-col gap-2 px-4 py-2 bg-black/40 rounded-2xl border border-white/10">
+          {/* Raise Slider - Hidden on small mobile, shown on md+ */}
+          <div className="hidden md:flex flex-col gap-2 px-4 py-2 bg-black/40 rounded-2xl border border-white/10">
             <div className="flex justify-between items-center">
               <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{t('raise')}</span>
               <span className="text-xs font-mono font-black text-yellow-500">{Math.max(gameState.currentBet + gameState.bigBlind, betSliderValue).toLocaleString()}{t('currency')}</span>
@@ -959,14 +969,14 @@ export default function App() {
               value={betSliderValue}
               onChange={(e) => setBetSliderValue(parseInt(e.target.value))}
               disabled={!isUserTurn}
-              className="w-40 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-yellow-500"
+              className="w-32 lg:w-40 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-yellow-500"
             />
           </div>
 
           <button 
             disabled={!isUserTurn} 
             onClick={() => handleAction('raise', Math.max(gameState.currentBet + gameState.bigBlind, betSliderValue))} 
-            className="px-8 h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-lg transition-all active:scale-95 shadow-lg shadow-emerald-900/40 border-b-4 border-emerald-800"
+            className="px-3 md:px-6 lg:px-8 h-10 md:h-12 lg:h-14 rounded-xl md:rounded-2xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-xs md:text-base lg:text-lg transition-all active:scale-95 shadow-lg shadow-emerald-900/40 border-b-2 md:border-b-4 border-emerald-800"
           >
             {t('raise')}
           </button>
@@ -974,16 +984,17 @@ export default function App() {
           <button 
             disabled={!isUserTurn} 
             onClick={() => handleAction('raise', user.chips + user.currentBet)} 
-            className="px-8 h-14 rounded-2xl bg-yellow-500 hover:bg-yellow-400 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-lg transition-all active:scale-95 shadow-lg shadow-yellow-900/40 border-b-4 border-yellow-700 text-black"
+            className="px-3 md:px-6 lg:px-8 h-10 md:h-12 lg:h-14 rounded-xl md:rounded-2xl bg-yellow-500 hover:bg-yellow-400 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-xs md:text-base lg:text-lg transition-all active:scale-95 shadow-lg shadow-yellow-900/40 border-b-2 md:border-b-4 border-yellow-700 text-black"
           >
             {t('allIn')}
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Right: Hand Equity - Hidden on small mobile */}
+        <div className="hidden md:flex items-center gap-4">
           <div className="flex flex-col items-end">
-            <span className="text-[10px] text-white/40 uppercase">{t('handEquity')}</span>
-            <span className="text-sm font-bold text-indigo-400 font-mono">{user.cards.length > 0 ? (PokerUtils.calculateWinRate(user.cards, gameState.communityCards, gameState.players.filter(p => !p.isFolded && p.id !== 'user').length, 100) * 100).toFixed(1) : '0.0'}%</span>
+            <span className="text-[8px] md:text-[9px] lg:text-[10px] text-white/40 uppercase">{t('handEquity')}</span>
+            <span className="text-xs md:text-sm font-bold text-indigo-400 font-mono">{user.cards.length > 0 ? (PokerUtils.calculateWinRate(user.cards, gameState.communityCards, gameState.players.filter(p => !p.isFolded && p.id !== 'user').length, 100) * 100).toFixed(1) : '0.0'}%</span>
           </div>
         </div>
       </footer>

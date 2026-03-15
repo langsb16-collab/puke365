@@ -52,7 +52,7 @@ export const ChatSystem: React.FC<ChatSystemProps> = ({ messages, onSendMessage,
       initial={{ opacity: 0, x: 300 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 300 }}
-      className="absolute right-6 top-20 bottom-24 w-96 bg-gradient-to-br from-black/90 to-neutral-900/90 backdrop-blur-xl border-2 border-[#d4af37]/30 rounded-3xl z-[60] shadow-2xl flex flex-col overflow-hidden"
+      className="absolute right-2 md:right-4 lg:right-6 top-16 md:top-20 bottom-20 md:bottom-24 w-[85vw] sm:w-80 md:w-96 bg-gradient-to-br from-black/90 to-neutral-900/90 backdrop-blur-xl border-2 border-[#d4af37]/30 rounded-2xl md:rounded-3xl z-[60] shadow-2xl flex flex-col overflow-hidden"
     >
       {/* Header */}
       <div className="bg-gradient-to-r from-[#d4af37]/20 to-transparent border-b border-white/10 px-6 py-4">
