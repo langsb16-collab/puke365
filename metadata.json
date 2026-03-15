@@ -1,0 +1,8 @@
+{
+  "name": " 토너먼트형 텍사스 홀덤",
+  "description": "High-stakes Texas Hold'em with 20 unique characters, real-time global chat, and multi-language support (EN, KO, ZH).",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
