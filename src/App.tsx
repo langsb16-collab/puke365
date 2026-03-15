@@ -23,7 +23,7 @@ export default function App() {
   const [showStandings, setShowStandings] = useState(false);
   const [selectedCharacterId, setSelectedCharacterId] = useState(1);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(true); // Changed to true by default
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
 
   const selectedCharacter = POKER_CHARACTERS.find(c => c.id === selectedCharacterId) || POKER_CHARACTERS[0];
@@ -305,15 +305,36 @@ export default function App() {
     };
     setChatMessages(prev => [...prev, newMessage]);
     
-    // Simple AI reaction
+    // Enhanced AI reaction with varied responses
     setTimeout(() => {
-      const aiResponse: ChatMessage = {
-        playerName: PLAYER_NAMES[Math.floor(Math.random() * PLAYER_NAMES.length)],
-        message: "Nice hand!",
-        timestamp: Date.now()
-      };
-      setChatMessages(prev => [...prev, aiResponse]);
-    }, 2000);
+      const aiResponses = [
+        "Nice hand!",
+        "Good luck! 🍀",
+        "Let's see what you got 🃏",
+        "All in! 💰",
+        "Bluff? 🤔",
+        "GG! 👍",
+        "Great play! 🔥",
+        "Tough luck 😅",
+        "You got this! 💪",
+        "Fold or fight? 🎰",
+        "Nice call! 👏",
+        "Risky move! 😱",
+        "Smart play 🧠",
+        "Let's raise it! 📈",
+      ];
+      
+      const randomAIPlayer = gameState.players.filter(p => p.isAI && !p.isFolded)[Math.floor(Math.random() * gameState.players.filter(p => p.isAI && !p.isFolded).length)];
+      
+      if (randomAIPlayer && Math.random() > 0.3) { // 70% chance of AI response
+        const aiResponse: ChatMessage = {
+          playerName: t(`char_${randomAIPlayer.characterId}`),
+          message: aiResponses[Math.floor(Math.random() * aiResponses.length)],
+          timestamp: Date.now()
+        };
+        setChatMessages(prev => [...prev, aiResponse]);
+      }
+    }, 1500 + Math.random() * 2000); // Random delay between 1.5-3.5 seconds
   };
 
   if (!gameState) return null;
