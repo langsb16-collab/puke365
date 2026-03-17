@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Player, GameState, BLIND_LEVELS, PlayerAction, GameMode, ChatMessage } from './types';
 import { PokerUtils } from './pokerUtils';
 import { PlayerSeat } from './components/PlayerSeat';
@@ -10,6 +10,7 @@ import { useTranslation } from './LanguageContext';
 import { POKER_CHARACTERS } from './constants';
 import { CharacterSelectUI } from './components/CharacterSelectUI';
 import { ChatSystem } from './components/ChatSystem';
+import { AudioManager } from './services/AudioManager';
 
 const INITIAL_CHIPS = 10000;
 const PLAYER_NAMES = ['Aria', 'Borgata', 'Caesars', 'Dunes', 'Encore', 'Flamingo', 'Golden', 'HardRock', 'Imperial'];
@@ -25,6 +26,7 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(true); // Changed to true by default
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const audioManager = useRef<AudioManager>(AudioManager.getInstance());
 
   const selectedCharacter = POKER_CHARACTERS.find(c => c.id === selectedCharacterId) || POKER_CHARACTERS[0];
 
@@ -98,6 +100,8 @@ export default function App() {
 
   useEffect(() => {
     initGame('lobby');
+    // Play welcome sound
+    audioManager.current.playSynthesized('welcome');
   }, [initGame]);
 
   const startNewHand = (state: GameState) => {
@@ -141,6 +145,11 @@ export default function App() {
   const handleAction = async (action: PlayerAction, amount: number = 0) => {
     if (!gameState || isProcessing) return;
     setIsProcessing(true);
+    
+    // Play chip sound for bet actions
+    if (action !== 'fold') {
+      audioManager.current.playSynthesized('chip');
+    }
 
     const newState = { ...gameState };
     const player = newState.players[newState.activePlayerIndex];
@@ -200,12 +209,18 @@ export default function App() {
     if (newState.stage === 'pre-flop') {
       newState.stage = 'flop';
       newState.communityCards = [newState.deck.pop()!, newState.deck.pop()!, newState.deck.pop()!];
+      // Play card sound
+      audioManager.current.playSynthesized('card');
     } else if (newState.stage === 'flop') {
       newState.stage = 'turn';
       newState.communityCards.push(newState.deck.pop()!);
+      // Play card sound
+      audioManager.current.playSynthesized('card');
     } else if (newState.stage === 'turn') {
       newState.stage = 'river';
       newState.communityCards.push(newState.deck.pop()!);
+      // Play card sound
+      audioManager.current.playSynthesized('card');
     } else {
       await resolveHand(newState);
       return;
@@ -262,6 +277,8 @@ export default function App() {
       }, ...state.logs];
       if (winningPlayer.id === 'user') {
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        // Play win sound
+        audioManager.current.playSynthesized('win');
         winningPlayer.stats.handsWon++;
       }
       winningPlayer.stats.handsPlayed++;
@@ -741,7 +758,7 @@ export default function App() {
   const isUserTurn = gameState.activePlayerIndex === gameState.players.findIndex(p => p.id === 'user') && !isProcessing;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-yellow-500/30 overflow-hidden flex flex-col">
+    <div className="min-h-screen w-full bg-[#0a0a0a] text-white font-sans selection:bg-yellow-500/30 overflow-x-hidden flex flex-col">
       {/* Responsive Header - Hidden on mobile, compact on tablet, full on desktop */}
       <header className="h-12 md:h-14 lg:h-16 border-b border-white/10 bg-black/80 backdrop-blur-xl flex items-center justify-between px-3 md:px-6 lg:px-8 z-50">
         <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
@@ -776,7 +793,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 relative flex items-center justify-center p-2 md:p-4">
+      <main className="flex-1 relative flex items-center justify-center p-2 md:p-4 w-full overflow-y-auto overflow-x-hidden">
         {/* Chat System - Hidden on mobile, slide panel on tablet, fixed on desktop */}
         <div className="hidden lg:block">
           <ChatSystem 
@@ -848,8 +865,8 @@ export default function App() {
             ))}
           </div>
         </div>
-        {/* Poker Table - Responsive sizing */}
-        <div className="relative w-full max-w-[95vw] md:max-w-4xl lg:max-w-5xl aspect-[16/10] md:aspect-[2/1] bg-[#1a3a2a] rounded-[100px] md:rounded-[150px] lg:rounded-[200px] border-[8px] md:border-[10px] lg:border-[12px] border-[#2a1a0a] shadow-[0_0_50px_rgba(0,0,0,0.8),inset_0_0_30px_rgba(0,0,0,0.5)] md:shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-visible">
+        {/* Poker Table - PC Full Display, Mobile Scrollable */}
+        <div className="relative w-[95vw] md:w-full md:max-w-none lg:w-[85vw] aspect-[16/10] md:aspect-[2/1] bg-[#1a3a2a] rounded-[100px] md:rounded-[150px] lg:rounded-[200px] border-[8px] md:border-[10px] lg:border-[12px] border-[#2a1a0a] shadow-[0_0_50px_rgba(0,0,0,0.8),inset_0_0_30px_rgba(0,0,0,0.5)] md:shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-visible">
           <div className="absolute inset-0 rounded-[92px] md:rounded-[140px] lg:rounded-[188px] opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
           <div className="absolute inset-1 md:inset-2 rounded-[85px] md:rounded-[135px] lg:rounded-[180px] border-2 border-white/10 pointer-events-none" />
 
