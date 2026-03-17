@@ -48,7 +48,7 @@ export const Card: React.FC<CardProps> = ({ card, hidden, className = '' }) => {
     <motion.div
       initial={{ scale: 0.8, opacity: 0, y: 20 }}
       animate={{ scale: 1, opacity: 1, y: 0 }}
-      className={`w-12 h-16 sm:w-16 sm:h-24 bg-white rounded-lg border-2 border-gray-200 shadow-xl flex flex-col p-1 sm:p-2 relative ${className}`}
+      className={`w-12 h-16 sm:w-16 sm:h-24 bg-white rounded-lg border-2 border-gray-200 shadow-xl flex flex-col p-1 sm:p-2 relative overflow-hidden ${className}`}
     >
       <div className={`text-xs sm:text-lg font-bold leading-none ${SUIT_COLORS[card.suit]}`}>
         {card.rank}
@@ -60,6 +60,13 @@ export const Card: React.FC<CardProps> = ({ card, hidden, className = '' }) => {
       <div className={`absolute bottom-1 right-1 sm:bottom-2 sm:right-2 text-lg sm:text-3xl opacity-20 ${SUIT_COLORS[card.suit]}`}>
         {SUIT_SYMBOLS[card.suit]}
       </div>
+
+      {/* Card Shine Effect */}
+      <motion.div 
+        animate={{ x: [-100, 200] }}
+        transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "linear" }}
+        className="absolute inset-0 w-8 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 pointer-events-none"
+      />
     </motion.div>
   );
 };

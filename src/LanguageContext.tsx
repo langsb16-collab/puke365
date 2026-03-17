@@ -13,6 +13,11 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>('en');
 
+  const handleSetLanguage = (lang: Language) => {
+    console.log('Setting language to:', lang);
+    setLanguage(lang);
+  };
+
   const t = (key: string, params?: Record<string, string | number>): string => {
     const translations = LOCALIZATION[language] as any;
     const fallback = LOCALIZATION.en as any;
@@ -27,7 +32,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

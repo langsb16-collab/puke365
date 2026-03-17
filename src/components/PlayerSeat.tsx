@@ -11,6 +11,8 @@ interface PlayerSeatProps {
   isDealer: boolean;
   showCards: boolean;
   position: string;
+  onCardClick?: (index: number) => void;
+  hasSqueezed?: Set<number>;
 }
 
 export const PlayerSeat: React.FC<PlayerSeatProps> = ({ 
@@ -18,7 +20,9 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
   isActive, 
   isDealer, 
   showCards,
-  position 
+  position,
+  onCardClick,
+  hasSqueezed = new Set()
 }) => {
   const { t } = useTranslation();
   const isFolded = player.isFolded;
@@ -73,12 +77,25 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         <div className="flex -space-x-4 mb-1">
           <AnimatePresence>
             {!isFolded && player.cards.map((card, i) => (
-              <Card 
-                key={`${player.id}-card-${i}`} 
-                card={card} 
-                hidden={!showCards && !player.isAI} 
-                className={i === 1 ? 'rotate-3' : '-rotate-3'}
-              />
+              <div 
+                key={`${player.id}-card-${i}`}
+                onClick={() => !player.isAI && onCardClick?.(i)}
+                className={!player.isAI && !showCards && !hasSqueezed.has(i) ? 'cursor-pointer' : ''}
+              >
+                <Card 
+                  card={card} 
+                  hidden={!showCards && !player.isAI && !hasSqueezed.has(i)} 
+                  className={`
+                    ${i === 1 ? 'rotate-3' : '-rotate-3'}
+                    ${!player.isAI && !showCards && !hasSqueezed.has(i) ? 'hover:scale-110 hover:-translate-y-2 transition-transform' : ''}
+                  `}
+                />
+                {!player.isAI && !showCards && !hasSqueezed.has(i) && (
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[8px] font-black px-1 rounded animate-bounce z-30">
+                    TAP
+                  </div>
+                )}
+              </div>
             ))}
           </AnimatePresence>
         </div>
@@ -112,7 +129,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
           {player.currentBet > 0 && (
             <div className="flex justify-center mb-2">
               <div className="px-3 py-0.5 bg-yellow-500/10 rounded-full border border-yellow-500/30">
-                <span className="text-yellow-500 text-[9px] font-black font-mono">BET: {player.currentBet.toLocaleString()}{t('currency')}</span>
+                <span className="text-yellow-500 text-[9px] font-black font-mono">{t('bet')}: {player.currentBet.toLocaleString()}{t('currency')}</span>
               </div>
             </div>
           )}
@@ -120,11 +137,11 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
           {/* Stats Display */}
           <div className="flex justify-around border-t border-white/10 pt-1">
             <div className="flex flex-col items-center">
-              <span className="text-[7px] text-white/30 uppercase font-bold tracking-widest">VPIP</span>
+              <span className="text-[7px] text-white/30 uppercase font-bold tracking-widest">{t('vpip')}</span>
               <span className="text-[9px] text-white/60 font-mono font-bold">{player.stats.vpip}%</span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-[7px] text-white/30 uppercase font-bold tracking-widest">PFR</span>
+              <span className="text-[7px] text-white/30 uppercase font-bold tracking-widest">{t('pfr')}</span>
               <span className="text-[9px] text-white/60 font-mono font-bold">{player.stats.pfr}%</span>
             </div>
           </div>
@@ -153,7 +170,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         {/* Win Rate (AI Only for debug/demo) */}
         {player.isAI && player.winRate !== undefined && !isFolded && (
           <div className="mt-1 text-[10px] text-white/40 font-mono">
-            EQ: {(player.winRate * 100).toFixed(1)}%
+            {t('eq')}: {(player.winRate * 100).toFixed(1)}%
           </div>
         )}
       </motion.div>

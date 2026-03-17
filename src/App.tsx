@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Player, GameState, BLIND_LEVELS, PlayerAction, GameMode, ChatMessage } from './types';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Player, GameState, PlayerAction, GameMode, ChatMessage, Card as CardType } from './types';
 import { PokerUtils } from './pokerUtils';
 import { PlayerSeat } from './components/PlayerSeat';
 import { Card } from './components/Card';
@@ -10,6 +10,11 @@ import { useTranslation } from './LanguageContext';
 import { POKER_CHARACTERS } from './constants';
 import { CharacterSelectUI } from './components/CharacterSelectUI';
 import { ChatSystem } from './components/ChatSystem';
+import { CasinoLobby } from './components/CasinoLobby';
+import { CardSqueeze } from './components/CardSqueeze';
+import { AudioManager } from './services/AudioManager';
+import { Ads } from './components/Ads';
+import { io, Socket } from 'socket.io-client';
 
 const INITIAL_CHIPS = 10000;
 const PLAYER_NAMES = ['Aria', 'Borgata', 'Caesars', 'Dunes', 'Encore', 'Flamingo', 'Golden', 'HardRock', 'Imperial'];
@@ -19,329 +24,98 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { t, language, setLanguage } = useTranslation();
   const [lobbyView, setLobbyView] = useState<'main' | 'tournaments' | 'stats' | 'shop' | 'characters'>('main');
-  const [betSliderValue, setBetSliderValue] = useState(0);
+  const [selectedCharacter, setSelectedCharacter] = useState(POKER_CHARACTERS[0]);
   const [showStandings, setShowStandings] = useState(false);
-  const [selectedCharacterId, setSelectedCharacterId] = useState(1);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [isChatOpen, setIsChatOpen] = useState(true); // Changed to true by default
-  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [activeSqueeze, setActiveSqueeze] = useState<CardType[] | null>(null);
+  const [hasSqueezed, setHasSqueezed] = useState<Set<string>>(new Set());
+  const socketRef = useRef<Socket | null>(null);
 
-  const selectedCharacter = POKER_CHARACTERS.find(c => c.id === selectedCharacterId) || POKER_CHARACTERS[0];
+  const audio = AudioManager.getInstance();
 
-  const initGame = useCallback((mode: GameMode = 'lobby') => {
-    const players: Player[] = [
-      {
-        id: 'user',
-        name: selectedCharacter.name,
-        chips: INITIAL_CHIPS,
-        cards: [],
-        isDealer: false,
-        isSmallBlind: false,
-        isBigBlind: false,
-        currentBet: 0,
-        isFolded: false,
-        isAllIn: false,
-        isAI: false,
-        avatar: selectedCharacter.avatar,
-        characterId: selectedCharacter.id,
-        stats: { vpip: 24, pfr: 18, handsPlayed: 120, handsWon: 45 }
-      },
-      ...PLAYER_NAMES.slice(0, 8).map((name, i) => {
-        const randomChar = POKER_CHARACTERS[Math.floor(Math.random() * POKER_CHARACTERS.length)];
-        return {
-          id: `ai-${i}`,
-          name: randomChar.name, // Use character name for AI too
-          chips: INITIAL_CHIPS,
-          cards: [],
-          isDealer: false,
-          isSmallBlind: false,
-          isBigBlind: false,
-          currentBet: 0,
-          isFolded: false,
-          isAllIn: false,
-          isAI: true,
-          avatar: randomChar.avatar,
-          characterId: randomChar.id,
-          stats: { 
-            vpip: Math.floor(Math.random() * 20) + 15, 
-            pfr: Math.floor(Math.random() * 15) + 10, 
-            handsPlayed: 1000, 
-            handsWon: 250 
-          }
-        };
-      })
-    ];
+  useEffect(() => {
+    // Connect to the real-time server
+    socketRef.current = io();
 
-    const initialState: GameState = {
-      mode,
-      players,
-      communityCards: [],
-      pot: 0,
-      sidePots: [],
-      currentBet: 0,
-      dealerIndex: 0,
-      activePlayerIndex: 1,
-      stage: 'pre-flop',
-      deck: PokerUtils.createDeck(),
-      blindLevel: 0,
-      smallBlind: BLIND_LEVELS[0].sb,
-      bigBlind: BLIND_LEVELS[0].bb,
-      logs: [{ key: 'log_welcome' }],
-      timer: 15
+    socketRef.current.on('game_state_update', (state: GameState) => {
+      setGameState(state);
+      setIsProcessing(false);
+    });
+
+    socketRef.current.on('chat_message', (msg: ChatMessage) => {
+      setChatMessages(prev => [...prev.slice(-49), msg]);
+    });
+
+    socketRef.current.on('player_won', () => {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#fbbf24', '#f59e0b', '#d97706']
+      });
+      audio.playSynthesized('win');
+    });
+
+    return () => {
+      socketRef.current?.disconnect();
     };
-
-    setGameState(initialState);
-    if (mode !== 'lobby') {
-      startNewHand(initialState);
-    }
   }, []);
 
-  useEffect(() => {
-    initGame('lobby');
-  }, [initGame]);
+  const handleSendMessage = (msg: string) => {
+    socketRef.current?.emit('chat_message', msg);
+  };
 
-  const startNewHand = (state: GameState) => {
-    const deck = PokerUtils.shuffle(PokerUtils.createDeck());
-    const dealerIndex = (state.dealerIndex + 1) % state.players.length;
-    const sbIndex = (dealerIndex + 1) % state.players.length;
-    const bbIndex = (dealerIndex + 2) % state.players.length;
-    const firstPlayerIndex = (dealerIndex + 3) % state.players.length;
-
-    const players = state.players.map((p, i) => ({
-      ...p,
-      cards: [deck.pop()!, deck.pop()!],
-      isDealer: i === dealerIndex,
-      isSmallBlind: i === sbIndex,
-      isBigBlind: i === bbIndex,
-      currentBet: i === sbIndex ? state.smallBlind : i === bbIndex ? state.bigBlind : 0,
-      isFolded: p.chips <= 0,
-      isAllIn: false,
-      lastAction: undefined,
-      winRate: undefined,
-    }));
-
-    // Deduct blinds
-    players[sbIndex].chips -= state.smallBlind;
-    players[bbIndex].chips -= state.bigBlind;
-
-    setGameState({
-      ...state,
-      players,
-      deck,
-      communityCards: [],
-      pot: state.smallBlind + state.bigBlind,
-      currentBet: state.bigBlind,
-      stage: 'pre-flop',
-      activePlayerIndex: firstPlayerIndex,
-      timer: 15,
-      logs: [{ key: 'log_new_hand', params: { sb: state.smallBlind, bb: state.bigBlind } }, ...state.logs.slice(0, 5)],
+  const onInitGame = (mode: GameMode) => {
+    socketRef.current?.emit('join_game', {
+      name: t(`char_${selectedCharacter.id}`),
+      avatar: selectedCharacter.avatar,
+      characterId: selectedCharacter.id,
+      chips: INITIAL_CHIPS
     });
   };
 
-  const handleAction = async (action: PlayerAction, amount: number = 0) => {
+  const handleAction = (action: PlayerAction, amount: number = 0) => {
     if (!gameState || isProcessing) return;
     setIsProcessing(true);
-
-    const newState = { ...gameState };
-    const player = newState.players[newState.activePlayerIndex];
-    
-    let actualBet = 0;
-    if (action === 'fold') {
-      player.isFolded = true;
-      player.lastAction = 'fold';
-    } else if (action === 'call' || action === 'check') {
-      actualBet = newState.currentBet - player.currentBet;
-      if (actualBet > player.chips) actualBet = player.chips;
-      player.chips -= actualBet;
-      player.currentBet += actualBet;
-      newState.pot += actualBet;
-      player.lastAction = actualBet === 0 ? 'check' : 'call';
-    } else if (action === 'raise') {
-      const raiseAmount = amount;
-      actualBet = raiseAmount - player.currentBet;
-      if (actualBet >= player.chips) {
-        actualBet = player.chips;
-        player.isAllIn = true;
-      }
-      player.chips -= actualBet;
-      player.currentBet += actualBet;
-      newState.pot += actualBet;
-      newState.currentBet = player.currentBet;
-      player.lastAction = player.isAllIn ? 'all-in' : 'raise';
-    }
-
-    // Move to next player
-    let nextIndex = (newState.activePlayerIndex + 1) % newState.players.length;
-    let attempts = 0;
-    while ((newState.players[nextIndex].isFolded || newState.players[nextIndex].isAllIn) && attempts < newState.players.length) {
-      nextIndex = (nextIndex + 1) % newState.players.length;
-      attempts++;
-    }
-
-    newState.activePlayerIndex = nextIndex;
-    newState.timer = 15;
-    
-    const activePlayers = newState.players.filter(p => !p.isFolded);
-    const allMatched = activePlayers.every(p => p.currentBet === newState.currentBet || p.isAllIn);
-    
-    if (allMatched || activePlayers.length === 1) {
-      await advanceStage(newState);
-    } else {
-      setGameState(newState);
-      setIsProcessing(false);
-    }
-  };
-
-  const advanceStage = async (state: GameState) => {
-    const newState = { ...state };
-    newState.players.forEach(p => p.currentBet = 0);
-    newState.currentBet = 0;
-
-    if (newState.stage === 'pre-flop') {
-      newState.stage = 'flop';
-      newState.communityCards = [newState.deck.pop()!, newState.deck.pop()!, newState.deck.pop()!];
-    } else if (newState.stage === 'flop') {
-      newState.stage = 'turn';
-      newState.communityCards.push(newState.deck.pop()!);
-    } else if (newState.stage === 'turn') {
-      newState.stage = 'river';
-      newState.communityCards.push(newState.deck.pop()!);
-    } else {
-      await resolveHand(newState);
-      return;
-    }
-
-    newState.players.forEach(p => {
-      if (p.isAI && !p.isFolded) {
-        p.winRate = PokerUtils.calculateWinRate(p.cards, newState.communityCards, newState.players.filter(op => !op.isFolded && op.id !== p.id).length);
-      }
-    });
-
-    newState.activePlayerIndex = (newState.dealerIndex + 1) % newState.players.length;
-    while (newState.players[newState.activePlayerIndex].isFolded) {
-      newState.activePlayerIndex = (newState.activePlayerIndex + 1) % newState.players.length;
-    }
-
-    setGameState(newState);
-    setIsProcessing(false);
-  };
-
-  const resolveHand = async (state: GameState) => {
-    const activePlayers = state.players.filter(p => !p.isFolded);
-    
-    // Simple side pot logic: if anyone is all-in, we should ideally split the pot.
-    // For now, we'll implement a basic version that handles the main pot.
-    // Real side pots require tracking contributions per player.
-    
-    let winningPlayer: Player | null = null;
-    let bestHandName = '';
-
-    if (activePlayers.length === 1) {
-      winningPlayer = activePlayers[0];
-      bestHandName = 'everyoneFolded';
-    } else {
-      const results = activePlayers.map(p => ({
-        player: p,
-        result: PokerUtils.evaluateHand([...p.cards, ...state.communityCards])
-      }));
-      results.sort((a, b) => b.result.score - a.result.score);
-      winningPlayer = results[0].player;
-      bestHandName = results[0].result.name;
-    }
-
-    if (winningPlayer) {
-      winningPlayer.chips += state.pot;
-      state.logs = [{ 
-        key: 'log_win', 
-        params: { 
-          name: t(`char_${winningPlayer.characterId}`), 
-          amount: state.pot.toLocaleString(), 
-          currency: t('currency'),
-          hand: t(bestHandName)
-        } 
-      }, ...state.logs];
-      if (winningPlayer.id === 'user') {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        winningPlayer.stats.handsWon++;
-      }
-      winningPlayer.stats.handsPlayed++;
-    }
-
-    setGameState({ ...state, pot: 0, stage: 'showdown' });
-    setTimeout(() => {
-      // Check for tournament end
-      const playersWithChips = state.players.filter(p => p.chips > 0);
-      if (playersWithChips.length === 1) {
-        state.logs = [{ 
-          key: 'log_tournament_over', 
-          params: { name: t(`char_${playersWithChips[0].characterId}`) } 
-        }, ...state.logs];
-        setGameState({ ...state, mode: 'lobby' });
-      } else {
-        startNewHand(state);
-      }
-      setIsProcessing(false);
-    }, 3000);
+    audio.playSynthesized('chip');
+    socketRef.current?.emit('player_action', { type: action, amount });
   };
 
   useEffect(() => {
-    if (!gameState || isProcessing || gameState.stage === 'showdown' || gameState.mode === 'lobby') return;
-    const activePlayer = gameState.players[gameState.activePlayerIndex];
-    if (activePlayer.isAI) {
-      const timer = setTimeout(() => {
-        const winRate = activePlayer.winRate || 0.4;
-        const decision = PokerUtils.getAIDecision(activePlayer, gameState, winRate);
-        handleAction(decision.action as PlayerAction, decision.amount);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [gameState, isProcessing]);
+    console.log('Current language:', language);
+  }, [language]);
 
-  const handleSendMessage = (message: string) => {
-    const newMessage: ChatMessage = {
-      playerName: selectedCharacter.name,
-      message,
-      timestamp: Date.now()
-    };
-    setChatMessages(prev => [...prev, newMessage]);
-    
-    // Enhanced AI reaction with varied responses
-    setTimeout(() => {
-      const aiResponses = [
-        "Nice hand!",
-        "Good luck! 🍀",
-        "Let's see what you got 🃏",
-        "All in! 💰",
-        "Bluff? 🤔",
-        "GG! 👍",
-        "Great play! 🔥",
-        "Tough luck 😅",
-        "You got this! 💪",
-        "Fold or fight? 🎰",
-        "Nice call! 👏",
-        "Risky move! 😱",
-        "Smart play 🧠",
-        "Let's raise it! 📈",
-      ];
-      
-      const randomAIPlayer = gameState.players.filter(p => p.isAI && !p.isFolded)[Math.floor(Math.random() * gameState.players.filter(p => p.isAI && !p.isFolded).length)];
-      
-      if (randomAIPlayer && Math.random() > 0.3) { // 70% chance of AI response
-        const aiResponse: ChatMessage = {
-          playerName: t(`char_${randomAIPlayer.characterId}`),
-          message: aiResponses[Math.floor(Math.random() * aiResponses.length)],
-          timestamp: Date.now()
-        };
-        setChatMessages(prev => [...prev, aiResponse]);
-      }
-    }, 1500 + Math.random() * 2000); // Random delay between 1.5-3.5 seconds
-  };
+  const [betSliderValue, setBetSliderValue] = useState(0);
+  const [selectedCharacterId, setSelectedCharacterId] = useState(1);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [squeezeCardIndex, setSqueezeCardIndex] = useState<number | null>(null);
+
+  const [isShaking, setIsShaking] = useState(false);
+
+  useEffect(() => {
+    if (gameState?.stage === 'pre-flop') {
+      audio.playSynthesized('tudum');
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+    }
+  }, [gameState?.stage]);
+
+  const userPlayer = gameState?.players.find(p => p.id === socketRef.current?.id);
+  const isUserTurn = gameState?.activePlayerIndex !== undefined && gameState.players[gameState.activePlayerIndex]?.id === socketRef.current?.id;
 
   if (!gameState) return null;
 
   if (gameState.mode === 'lobby') {
     return (
-      <div className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden">
+      <motion.div 
+        animate={isShaking ? {
+          x: [0, -5, 5, -5, 5, 0],
+          y: [0, 5, -5, 5, -5, 0]
+        } : {}}
+        transition={{ duration: 0.5 }}
+        className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden"
+      >
         {/* Top Navigation Bar - Premium Casino Style */}
         <header className="h-20 bg-black/40 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-8 z-50 shadow-2xl">
           <div className="flex items-center gap-6">
@@ -428,159 +202,13 @@ export default function App() {
         <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="wait">
             {lobbyView === 'main' && (
-              <motion.main 
-                key="main"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="max-w-7xl mx-auto space-y-8"
-              >
-                {/* Global Jackpot Banner */}
-                <div className="relative h-24 rounded-3xl bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border border-yellow-500/30 overflow-hidden flex items-center justify-between px-12 shadow-[0_0_50px_rgba(234,179,8,0.1)]">
-                  <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #d4af37 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-                  <div className="flex items-center gap-6 relative z-10">
-                    <div className="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-black shadow-lg shadow-yellow-500/40 animate-pulse">
-                      <Trophy size={24} />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-500/60">{t('globalJackpot')}</span>
-                      <h2 className="text-4xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 drop-shadow-sm">1,245,890.00{t('currency')}</h2>
-                    </div>
-                  </div>
-                  <div className="hidden md:flex gap-2 relative z-10">
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={i} className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                        <Coins size={16} className="text-white/20" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                  {/* Main Game Modes */}
-                  <div className="lg:col-span-8 space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <motion.button
-                        whileHover={{ scale: 1.02, y: -5 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setLobbyView('tournaments')}
-                        className="relative h-72 rounded-[40px] bg-gradient-to-br from-red-600 to-red-950 p-10 flex flex-col justify-end overflow-hidden shadow-2xl group border border-red-500/30"
-                      >
-                        <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                          <Trophy size={300} className="text-white -mr-10 -mt-10" />
-                        </div>
-                        <div className="relative z-10 text-left">
-                          <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">Live Now</span>
-                            <span className="px-3 py-1 bg-yellow-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest">10M {t('gtd')}</span>
-                          </div>
-                          <h3 className="text-5xl font-black uppercase tracking-tighter italic leading-none mb-2">{t('tournament')}</h3>
-                          <p className="text-white/60 text-sm font-medium uppercase tracking-widest">{t('wsopMainEvent')} • {t('worldSeries')}</p>
-                        </div>
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02, y: -5 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => initGame('cash')}
-                        className="relative h-72 rounded-[40px] bg-gradient-to-br from-emerald-600 to-emerald-950 p-10 flex flex-col justify-end overflow-hidden shadow-2xl group border border-emerald-500/30"
-                      >
-                        <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
-                          <Coins size={300} className="text-white -mr-10 -mt-10" />
-                        </div>
-                        <div className="relative z-10 text-left">
-                          <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">{t('instantAction')}</span>
-                          </div>
-                          <h3 className="text-5xl font-black uppercase tracking-tighter italic leading-none mb-2">{t('cashGame')}</h3>
-                          <p className="text-white/60 text-sm font-medium uppercase tracking-widest">{t('noLimitHoldem')} • {t('blinds')} 50/100</p>
-                        </div>
-                      </motion.button>
-                    </div>
-
-                    {/* Secondary Game Modes */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      {[
-                        { id: 'sit-and-go', title: t('sitAndGo'), icon: <Timer />, color: 'from-blue-600 to-blue-950', action: () => initGame('sit-and-go') },
-                        { id: 'private', title: t('privateTable'), icon: <Users />, color: 'from-purple-600 to-purple-950', action: () => null },
-                        { id: 'stats', title: t('stats'), icon: <BarChart3 />, color: 'from-zinc-700 to-zinc-900', action: () => setLobbyView('stats') },
-                        { id: 'shop', title: t('shop'), icon: <ShoppingBag />, color: 'from-yellow-600 to-yellow-900', action: () => setLobbyView('shop') },
-                      ].map(mode => (
-                        <motion.button
-                          key={mode.id}
-                          whileHover={{ y: -5 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={mode.action}
-                          className={`relative h-32 rounded-3xl bg-gradient-to-br ${mode.color} p-6 flex flex-col justify-between overflow-hidden shadow-xl border border-white/10 group`}
-                        >
-                          <div className="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-500">{mode.icon}</div>
-                          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-2">{mode.icon}</div>
-                          <h4 className="text-sm font-black uppercase tracking-tighter italic leading-none">{mode.title}</h4>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Sidebar: Quick Play & Stats */}
-                  <div className="lg:col-span-4 space-y-8">
-                    {/* Quick Play Section */}
-                    <div className="bg-white/5 rounded-[40px] p-8 border border-white/10 shadow-2xl space-y-6">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-black uppercase tracking-tighter italic flex items-center gap-2">
-                          <Timer size={18} className="text-yellow-500" /> {t('quickPlay')}
-                        </h3>
-                        <span className="text-[10px] font-bold text-white/40 uppercase">{t('fastJoin')}</span>
-                      </div>
-                      <div className="space-y-3">
-                        {[100, 500, 1000].map(buyin => (
-                          <button 
-                            key={buyin}
-                            onClick={() => initGame('cash')}
-                            className="w-full h-14 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 flex items-center justify-between px-6 transition-all group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Coins size={16} className="text-yellow-500 group-hover:scale-110 transition-transform" />
-                              <span className="font-bold font-mono">{buyin.toLocaleString()}{t('currency')} {t('buyIn')}</span>
-                            </div>
-                            <span className="text-[10px] font-black uppercase text-white/20 group-hover:text-yellow-500 transition-colors">{t('join')}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Player Stats Summary */}
-                    <div className="bg-gradient-to-br from-zinc-900 to-black rounded-[40px] p-8 border border-white/10 shadow-2xl space-y-6">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-black uppercase tracking-tighter italic flex items-center gap-2">
-                          <BarChart3 size={18} className="text-blue-500" /> {t('yourStats')}
-                        </h3>
-                        <button onClick={() => setLobbyView('stats')} className="text-[10px] font-bold text-blue-500 uppercase hover:underline">{t('viewAll')}</button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                          <p className="text-[9px] text-white/40 uppercase font-bold mb-1">{t('handsPlayed')}</p>
-                          <p className="text-xl font-black font-mono">{gameState.players[0].stats.handsPlayed}</p>
-                        </div>
-                        <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                          <p className="text-[9px] text-white/40 uppercase font-bold mb-1">{t('winRate')}</p>
-                          <p className="text-xl font-black font-mono text-emerald-400">
-                            {gameState.players[0].stats.handsPlayed > 0 ? `${((gameState.players[0].stats.handsWon / gameState.players[0].stats.handsPlayed) * 100).toFixed(1)}%` : '0%'}
-                          </p>
-                        </div>
-                        <div className="col-span-2 bg-white/5 rounded-2xl p-4 border border-white/5 flex items-center justify-between">
-                          <div>
-                            <p className="text-[9px] text-white/40 uppercase font-bold mb-1">{t('totalProfit')}</p>
-                            <p className="text-xl font-black font-mono text-yellow-500">+3,240.00{t('currency')}</p>
-                          </div>
-                          <div className="w-16 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
-                            <BarChart3 size={16} className="text-emerald-400" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.main>
+              <CasinoLobby 
+                selectedCharacter={selectedCharacter}
+                chips={gameState.players[0].chips}
+                onSetView={setLobbyView}
+                onInitGame={onInitGame}
+                stats={gameState.players[0].stats}
+              />
             )}
 
           {lobbyView === 'characters' && (
@@ -624,7 +252,7 @@ export default function App() {
                   { name: 'Daily Deepstack', buyin: 500, players: '450/500', prize: '$250K GTD', time: 'Starting Now' },
                   { name: 'Sunday Million', buyin: 1000, players: '8,900/10,000', prize: '$1M GTD', time: 'In 2h 15m' },
                 ].map((t, i) => (
-                  <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer" onClick={() => initGame('tournament')}>
+                  <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer" onClick={() => onInitGame('tournament')}>
                     <div className="flex flex-col">
                       <span className="font-bold">{t.name}</span>
                       <span className="text-xs text-white/40 uppercase tracking-wider">{t.time}</span>
@@ -733,59 +361,81 @@ export default function App() {
             </button>
           ))}
         </footer>
-      </div>
+      </motion.div>
     );
   }
 
-  const user = gameState.players.find(p => p.id === 'user')!;
-  const isUserTurn = gameState.activePlayerIndex === gameState.players.findIndex(p => p.id === 'user') && !isProcessing;
+  const user = userPlayer;
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-yellow-500/30 overflow-hidden flex flex-col">
-      {/* Responsive Header - Hidden on mobile, compact on tablet, full on desktop */}
-      <header className="h-12 md:h-14 lg:h-16 border-b border-white/10 bg-black/80 backdrop-blur-xl flex items-center justify-between px-3 md:px-6 lg:px-8 z-50">
-        <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
-          <button onClick={() => initGame('lobby')} className="p-1.5 md:p-2 hover:bg-white/5 rounded-xl transition-colors text-white/40 hover:text-white">
-            <LayoutGrid size={16} className="md:w-5 md:h-5" />
+    <motion.div 
+      animate={isShaking ? {
+        x: [0, -5, 5, -5, 5, 0],
+        y: [0, 5, -5, 5, -5, 0]
+      } : {}}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-yellow-500/30 overflow-hidden flex flex-col"
+    >
+      {/* Card Squeeze Overlay */}
+      <AnimatePresence>
+        {activeSqueeze && (
+          <CardSqueeze 
+            cards={activeSqueeze} 
+            onClose={() => {
+              if (socketRef.current?.id) {
+                setHasSqueezed(prev => new Set(prev).add(socketRef.current!.id));
+              }
+              setActiveSqueeze(null);
+            }} 
+          />
+        )}
+      </AnimatePresence>
+
+      <header className="h-16 border-b border-white/10 bg-black/80 backdrop-blur-xl flex items-center justify-between px-8 z-50">
+        <div className="flex items-center gap-6">
+          <button onClick={() => onInitGame('cash')} className="p-2 hover:bg-white/5 rounded-xl transition-colors text-white/40 hover:text-white">
+            <LayoutGrid size={20} />
           </button>
-          <div className="h-6 md:h-8 w-px bg-white/10 hidden md:block" />
+          <div className="h-8 w-px bg-white/10" />
           <div className="flex flex-col">
-            <div className="flex items-center gap-1 md:gap-2">
-              <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-yellow-500">{t('jackpot')}</span>
-              <div className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-red-500 animate-pulse" />
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-yellow-500">{t('jackpot')}</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
             </div>
-            <span className="text-sm md:text-base lg:text-lg font-black font-mono leading-none">1,245,890{t('currency')}</span>
+            <span className="text-lg font-black font-mono leading-none">1,245,890.00{t('currency')}</span>
           </div>
         </div>
 
         <div className="flex flex-col items-center">
-          <h1 className="text-xs md:text-sm lg:text-[18px] font-black uppercase tracking-tighter text-[#d4af37] italic">WSOP ELITE</h1>
-          <div className="flex items-center gap-2 md:gap-3">
-            <span className="text-[8px] md:text-[10px] text-white/40 uppercase font-bold tracking-widest">{t('tournament')} • {t('table')} 01</span>
+          <h1 className="text-[18px] font-black uppercase tracking-tighter text-[#d4af37] italic">WSOP ELITE</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{t('tournament')} • {t('table')} 01</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
-          <button onClick={() => setShowStandings(!showStandings)} className="p-1.5 md:p-2 lg:p-2.5 bg-yellow-500/10 text-yellow-500 rounded-xl border border-yellow-500/20 hover:bg-yellow-500/20 transition-all">
-            <Trophy size={14} className="md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />
+        <div className="flex items-center gap-4">
+          <button onClick={() => setShowStandings(!showStandings)} className="p-2.5 bg-yellow-500/10 text-yellow-500 rounded-xl border border-yellow-500/20 hover:bg-yellow-500/20 transition-all">
+            <Trophy size={18} />
           </button>
-          <div className="h-6 md:h-8 w-px bg-white/10 hidden md:block" />
-          <button className="p-1.5 md:p-2 lg:p-2.5 bg-white/5 text-white/40 rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
-            <Settings size={14} className="md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />
+          <div className="h-8 w-px bg-white/10" />
+          <button className="p-2.5 bg-white/5 text-white/40 rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
+            <Settings size={18} />
           </button>
         </div>
       </header>
 
-      <main className="flex-1 relative flex items-center justify-center p-2 md:p-4">
-        {/* Chat System - Hidden on mobile, slide panel on tablet, fixed on desktop */}
-        <div className="hidden lg:block">
-          <ChatSystem 
-            messages={chatMessages} 
-            onSendMessage={handleSendMessage} 
-            isOpen={isChatOpen} 
-            onClose={() => setIsChatOpen(false)} 
-          />
-        </div>
+      <main className="flex-1 relative flex items-center justify-center p-4">
+        {/* Table Ads */}
+        <Ads type="table" />
+
+        {/* Chat System */}
+        <ChatSystem 
+          messages={chatMessages} 
+          onSendMessage={handleSendMessage} 
+          isOpen={isChatOpen} 
+          onClose={() => setIsChatOpen(false)} 
+        />
 
         {/* Hand History Panel */}
         <div className="absolute left-6 top-6 bottom-6 w-64 bg-black/40 backdrop-blur-md border border-white/10 rounded-3xl z-40 p-4 flex flex-col hidden lg:flex">
@@ -820,7 +470,7 @@ export default function App() {
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] font-bold text-white/40 w-4">{i + 1}</span>
                       <img src={p.avatar} className="w-8 h-8 rounded-full border border-white/10" alt="" />
-                      <span className={`text-sm font-bold ${p.id === 'user' ? 'text-yellow-500' : 'text-white'}`}>{p.name}</span>
+                      <span className={`text-sm font-bold ${p.id === 'user' ? 'text-yellow-500' : 'text-white'}`}>{t(`char_${p.characterId}`)}</span>
                     </div>
                     <span className="text-xs font-mono font-bold">{p.chips.toLocaleString()}{t('currency')}</span>
                   </div>
@@ -848,47 +498,44 @@ export default function App() {
             ))}
           </div>
         </div>
-        {/* Poker Table - Responsive sizing */}
-        <div className="relative w-full max-w-[95vw] md:max-w-4xl lg:max-w-5xl aspect-[16/10] md:aspect-[2/1] bg-[#1a3a2a] rounded-[100px] md:rounded-[150px] lg:rounded-[200px] border-[8px] md:border-[10px] lg:border-[12px] border-[#2a1a0a] shadow-[0_0_50px_rgba(0,0,0,0.8),inset_0_0_30px_rgba(0,0,0,0.5)] md:shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-visible">
-          <div className="absolute inset-0 rounded-[92px] md:rounded-[140px] lg:rounded-[188px] opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-          <div className="absolute inset-1 md:inset-2 rounded-[85px] md:rounded-[135px] lg:rounded-[180px] border-2 border-white/10 pointer-events-none" />
+        <div className="relative w-full max-w-5xl aspect-[2/1] bg-[#1a3a2a] rounded-[200px] border-[12px] border-[#2a1a0a] shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-visible">
+          <div className="absolute inset-0 rounded-[188px] opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+          <div className="absolute inset-2 rounded-[180px] border-2 border-white/10 pointer-events-none" />
 
-          {/* Top Branding Logo - Responsive sizing */}
-          <div className="absolute top-6 md:top-10 lg:top-12 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none select-none z-0">
-            <span className="text-[10px] md:text-sm lg:text-[18px] font-black uppercase tracking-tighter text-[#d4af37]/60 italic">WSOP ELITE</span>
-            <span className="text-base md:text-xl lg:text-[28px] font-black uppercase tracking-[3px] md:tracking-[5px] lg:tracking-[6px] text-white/60 leading-none mt-0.5 md:mt-1">CHUANQI PUKE</span>
+          {/* Top Branding Logo */}
+          <div className="absolute top-12 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none select-none z-0">
+            <span className="text-[18px] font-black uppercase tracking-tighter text-[#d4af37]/60 italic">WSOP ELITE</span>
+            <span className="text-[28px] font-black uppercase tracking-[6px] text-white/60 leading-none mt-1">CHUANQI PUKE</span>
           </div>
 
-          {/* Center Watermark (Faint) - Hidden on mobile */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] select-none z-0 hidden md:flex">
+          {/* Center Watermark (Faint) */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] select-none z-0">
             <div className="flex flex-col items-center">
-              <div className="relative scale-50 md:scale-65 lg:scale-75">
-                <div className="flex gap-1 md:gap-2 mb-1 md:mb-2">
-                  <div className="w-8 h-12 md:w-10 md:h-14 lg:w-12 lg:h-16 bg-white/10 rounded-sm border border-white/20 rotate-[-15deg]" />
-                  <div className="w-8 h-12 md:w-10 md:h-14 lg:w-12 lg:h-16 bg-white/10 rounded-sm border border-white/20" />
-                  <div className="w-8 h-12 md:w-10 md:h-14 lg:w-12 lg:h-16 bg-white/10 rounded-sm border border-white/20 rotate-[15deg]" />
+              <div className="relative scale-75">
+                <div className="flex gap-2 mb-2">
+                  <div className="w-12 h-16 bg-white/10 rounded-sm border border-white/20 rotate-[-15deg]" />
+                  <div className="w-12 h-16 bg-white/10 rounded-sm border border-white/20" />
+                  <div className="w-12 h-16 bg-white/10 rounded-sm border border-white/20 rotate-[15deg]" />
                 </div>
-                <div className="absolute -bottom-3 md:-bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                  <span className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-white/40 italic">CHUANQI PUKE</span>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <span className="text-4xl font-black tracking-tighter text-white/40 italic">CHUANQI PUKE</span>
                 </div>
               </div>
-              <div className="mt-4 md:mt-6 lg:mt-8 text-[8px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] font-bold text-white/30 uppercase">{t('goForGold')}</div>
+              <div className="mt-8 text-[10px] tracking-[0.3em] font-bold text-white/30 uppercase">{t('goForGold')}</div>
             </div>
           </div>
 
-          {/* Community Cards - Responsive sizing */}
-          <div className="flex gap-1 sm:gap-2 md:gap-3 lg:gap-4 z-10">
+          <div className="flex gap-2 sm:gap-4 z-10">
             <AnimatePresence>
-              {gameState.communityCards.map((card, i) => <Card key={`community-${i}`} card={card} className="shadow-2xl w-10 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24" />)}
-              {Array.from({ length: 5 - gameState.communityCards.length }).map((_, i) => <div key={`empty-${i}`} className="w-10 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24 rounded-lg border-2 border-white/5 bg-black/20" />)}
+              {gameState.communityCards.map((card, i) => <Card key={`community-${i}`} card={card} className="shadow-2xl" />)}
+              {Array.from({ length: 5 - gameState.communityCards.length }).map((_, i) => <div key={`empty-${i}`} className="w-12 h-16 sm:w-16 sm:h-24 rounded-lg border-2 border-white/5 bg-black/20" />)}
             </AnimatePresence>
           </div>
 
-          {/* Pot Display - Responsive sizing */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-10 md:translate-y-12 lg:translate-y-16 flex flex-col items-center">
-            <div className="px-3 py-1.5 md:px-5 md:py-2 lg:px-6 lg:py-2 bg-black/80 backdrop-blur-xl rounded-xl md:rounded-2xl border border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.2)] md:shadow-[0_0_30px_rgba(234,179,8,0.2)]">
-              <div className="text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-white/40 text-center mb-0.5 md:mb-1">{t('pot')}</div>
-              <div className="text-sm md:text-lg lg:text-xl font-black text-yellow-500 font-mono tracking-tighter">{gameState.pot.toLocaleString()}{t('currency')}</div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-16 flex flex-col items-center">
+            <div className="px-6 py-2 bg-black/80 backdrop-blur-xl rounded-2xl border border-yellow-500/30 shadow-[0_0_30px_rgba(234,179,8,0.2)]">
+              <div className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center mb-1">{t('pot')}</div>
+              <div className="text-xl font-black text-yellow-500 font-mono tracking-tighter">{gameState.pot.toLocaleString()}{t('currency')}</div>
             </div>
           </div>
 
@@ -897,7 +544,18 @@ export default function App() {
               "left-1/2 top-[110%]", "left-[10%] top-[80%]", "left-[5%] top-1/2", "left-[10%] top-[20%]",
               "left-[30%] top-[-10%]", "left-[50%] top-[-15%]", "left-[70%] top-[-10%]", "left-[90%] top-[20%]", "left-[95%] top-1/2"
             ];
-            return <PlayerSeat key={p.id} player={p} isActive={gameState.activePlayerIndex === i} isDealer={p.isDealer} showCards={gameState.stage === 'showdown'} position={positions[i]} />;
+            return (
+              <PlayerSeat 
+                key={p.id} 
+                player={p} 
+                isActive={gameState.activePlayerIndex === i} 
+                isDealer={p.isDealer} 
+                showCards={gameState.stage === 'showdown' || p.id === socketRef.current?.id} 
+                position={positions[i]} 
+                onCardClick={p.id === socketRef.current?.id ? () => setActiveSqueeze(p.cards) : undefined}
+                hasSqueezed={p.id === socketRef.current?.id ? hasSqueezed.has(p.id) : undefined}
+              />
+            );
           })}
         </div>
 
@@ -913,36 +571,24 @@ export default function App() {
         </div>
       </main>
 
-      {/* Responsive Footer - Simplified on mobile, full on desktop */}
-      <footer className="h-20 md:h-22 lg:h-24 bg-neutral-900 border-t border-white/10 px-2 md:px-4 lg:px-6 flex items-center justify-between z-50 relative">
-        {/* Exit Game Button - Hidden on small mobile, visible on md+ */}
-        <button 
-          onClick={() => initGame('lobby')}
-          className="hidden md:flex absolute -top-12 lg:-top-16 right-3 md:right-4 lg:right-6 px-3 py-2 md:px-5 md:py-2.5 lg:px-6 lg:py-3 bg-gradient-to-r from-neutral-800 to-neutral-900 hover:from-neutral-700 hover:to-neutral-800 text-white/80 hover:text-white rounded-lg md:rounded-xl border-2 border-[#d4af37] font-bold uppercase tracking-wider text-xs md:text-sm transition-all shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] items-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-4 md:h-4"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          <span className="hidden md:inline">{t('exitGame')}</span>
-        </button>
-
-        {/* Left: Chip Info - Compact on mobile */}
-        <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
+      <footer className="h-24 bg-neutral-900 border-t border-white/10 px-6 flex items-center justify-between z-50">
+        <div className="flex items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-[8px] md:text-[9px] lg:text-[10px] text-white/40 uppercase">{t('yourChips')}</span>
-            <span className="text-base md:text-lg lg:text-xl font-bold text-yellow-500 font-mono">{user.chips.toLocaleString()}{t('currency')}</span>
+            <span className="text-[10px] text-white/40 uppercase">{t('yourChips')}</span>
+            <span className="text-xl font-bold text-yellow-500 font-mono">{user.chips.toLocaleString()}{t('currency')}</span>
           </div>
-          <div className="h-8 md:h-10 w-px bg-white/10" />
+          <div className="h-10 w-px bg-white/10" />
           <div className="flex flex-col">
-            <span className="text-[8px] md:text-[9px] lg:text-[10px] text-white/40 uppercase">{t('currentBet')}</span>
-            <span className="text-base md:text-lg lg:text-xl font-bold text-white font-mono">{gameState.currentBet.toLocaleString()}{t('currency')}</span>
+            <span className="text-[10px] text-white/40 uppercase">{t('currentBet')}</span>
+            <span className="text-xl font-bold text-white font-mono">{gameState.currentBet.toLocaleString()}{t('currency')}</span>
           </div>
         </div>
 
-        {/* Center: Action Buttons - Responsive sizing */}
-        <div className="flex items-center gap-1.5 md:gap-2 lg:gap-3">
+        <div className="flex items-center gap-3">
           <button 
             disabled={!isUserTurn} 
             onClick={() => handleAction('fold')} 
-            className="px-3 md:px-6 lg:px-8 h-10 md:h-12 lg:h-14 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-xs md:text-base lg:text-lg transition-all active:scale-95 shadow-lg shadow-red-900/40 border-b-2 md:border-b-4 border-red-800"
+            className="px-8 h-14 rounded-2xl bg-red-600 hover:bg-red-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-lg transition-all active:scale-95 shadow-lg shadow-red-900/40 border-b-4 border-red-800"
           >
             {t('fold')}
           </button>
@@ -950,13 +596,12 @@ export default function App() {
           <button 
             disabled={!isUserTurn} 
             onClick={() => handleAction(gameState.currentBet === user.currentBet ? 'check' : 'call')} 
-            className="px-3 md:px-6 lg:px-8 h-10 md:h-12 lg:h-14 rounded-xl md:rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-xs md:text-base lg:text-lg transition-all active:scale-95 shadow-lg shadow-blue-900/40 border-b-2 md:border-b-4 border-blue-800"
+            className="px-8 h-14 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-lg transition-all active:scale-95 shadow-lg shadow-blue-900/40 border-b-4 border-blue-800"
           >
             {gameState.currentBet === user.currentBet ? t('check') : t('call')}
           </button>
           
-          {/* Raise Slider - Hidden on small mobile, shown on md+ */}
-          <div className="hidden md:flex flex-col gap-2 px-4 py-2 bg-black/40 rounded-2xl border border-white/10">
+          <div className="flex flex-col gap-2 px-4 py-2 bg-black/40 rounded-2xl border border-white/10">
             <div className="flex justify-between items-center">
               <span className="text-[10px] text-white/40 uppercase font-black tracking-widest">{t('raise')}</span>
               <span className="text-xs font-mono font-black text-yellow-500">{Math.max(gameState.currentBet + gameState.bigBlind, betSliderValue).toLocaleString()}{t('currency')}</span>
@@ -969,14 +614,14 @@ export default function App() {
               value={betSliderValue}
               onChange={(e) => setBetSliderValue(parseInt(e.target.value))}
               disabled={!isUserTurn}
-              className="w-32 lg:w-40 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-yellow-500"
+              className="w-40 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-yellow-500"
             />
           </div>
 
           <button 
             disabled={!isUserTurn} 
             onClick={() => handleAction('raise', Math.max(gameState.currentBet + gameState.bigBlind, betSliderValue))} 
-            className="px-3 md:px-6 lg:px-8 h-10 md:h-12 lg:h-14 rounded-xl md:rounded-2xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-xs md:text-base lg:text-lg transition-all active:scale-95 shadow-lg shadow-emerald-900/40 border-b-2 md:border-b-4 border-emerald-800"
+            className="px-8 h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-lg transition-all active:scale-95 shadow-lg shadow-emerald-900/40 border-b-4 border-emerald-800"
           >
             {t('raise')}
           </button>
@@ -984,20 +629,19 @@ export default function App() {
           <button 
             disabled={!isUserTurn} 
             onClick={() => handleAction('raise', user.chips + user.currentBet)} 
-            className="px-3 md:px-6 lg:px-8 h-10 md:h-12 lg:h-14 rounded-xl md:rounded-2xl bg-yellow-500 hover:bg-yellow-400 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-xs md:text-base lg:text-lg transition-all active:scale-95 shadow-lg shadow-yellow-900/40 border-b-2 md:border-b-4 border-yellow-700 text-black"
+            className="px-8 h-14 rounded-2xl bg-yellow-500 hover:bg-yellow-400 disabled:opacity-30 disabled:cursor-not-allowed font-black uppercase tracking-tighter italic text-lg transition-all active:scale-95 shadow-lg shadow-yellow-900/40 border-b-4 border-yellow-700 text-black"
           >
             {t('allIn')}
           </button>
         </div>
 
-        {/* Right: Hand Equity - Hidden on small mobile */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
-            <span className="text-[8px] md:text-[9px] lg:text-[10px] text-white/40 uppercase">{t('handEquity')}</span>
-            <span className="text-xs md:text-sm font-bold text-indigo-400 font-mono">{user.cards.length > 0 ? (PokerUtils.calculateWinRate(user.cards, gameState.communityCards, gameState.players.filter(p => !p.isFolded && p.id !== 'user').length, 100) * 100).toFixed(1) : '0.0'}%</span>
+            <span className="text-[10px] text-white/40 uppercase">{t('handEquity')}</span>
+            <span className="text-sm font-bold text-indigo-400 font-mono">{user.cards.length > 0 ? (PokerUtils.calculateWinRate(user.cards, gameState.communityCards, gameState.players.filter(p => !p.isFolded && p.id !== 'user').length, 100) * 100).toFixed(1) : '0.0'}%</span>
           </div>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 }
