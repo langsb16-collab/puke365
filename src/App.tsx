@@ -10,6 +10,7 @@ import { useTranslation } from './LanguageContext';
 import { POKER_CHARACTERS } from './constants';
 import { CharacterSelectUI } from './components/CharacterSelectUI';
 import { ChatSystem } from './components/ChatSystem';
+import { CardSqueeze } from './components/CardSqueeze';
 import { AudioManager } from './services/AudioManager';
 
 const INITIAL_CHIPS = 10000;
@@ -26,6 +27,8 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(true); // Changed to true by default
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [squeezeCardIndex, setSqueezeCardIndex] = useState<number | null>(null);
+  const [squeezedCards, setSqueezedCards] = useState<Set<number>>(new Set());
   const audioManager = useRef<AudioManager>(AudioManager.getInstance());
 
   const selectedCharacter = POKER_CHARACTERS.find(c => c.id === selectedCharacterId) || POKER_CHARACTERS[0];
@@ -105,6 +108,10 @@ export default function App() {
   }, [initGame]);
 
   const startNewHand = (state: GameState) => {
+    // Reset squeezed cards for new hand
+    setSqueezedCards(new Set());
+    setSqueezeCardIndex(null);
+    
     const deck = PokerUtils.shuffle(PokerUtils.createDeck());
     const dealerIndex = (state.dealerIndex + 1) % state.players.length;
     const sbIndex = (dealerIndex + 1) % state.players.length;
@@ -313,6 +320,23 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [gameState, isProcessing]);
+
+  const handleCardClick = (cardIndex: number) => {
+    if (!gameState || gameState.stage === 'showdown') return;
+    const userPlayer = gameState.players.find(p => p.id === 'user');
+    if (!userPlayer || userPlayer.isAI) return;
+    
+    // Set the card to be squeezed
+    setSqueezeCardIndex(cardIndex);
+    audioManager.current.playSynthesized('click');
+  };
+
+  const handleSqueezeComplete = () => {
+    if (squeezeCardIndex !== null) {
+      setSqueezedCards(prev => new Set(prev).add(squeezeCardIndex));
+      setSqueezeCardIndex(null);
+    }
+  };
 
   const handleSendMessage = (message: string) => {
     const newMessage: ChatMessage = {
@@ -914,9 +938,50 @@ export default function App() {
               "left-1/2 top-[110%]", "left-[10%] top-[80%]", "left-[5%] top-1/2", "left-[10%] top-[20%]",
               "left-[30%] top-[-10%]", "left-[50%] top-[-15%]", "left-[70%] top-[-10%]", "left-[90%] top-[20%]", "left-[95%] top-1/2"
             ];
-            return <PlayerSeat key={p.id} player={p} isActive={gameState.activePlayerIndex === i} isDealer={p.isDealer} showCards={gameState.stage === 'showdown'} position={positions[i]} />;
+            return (
+              <PlayerSeat 
+                key={p.id} 
+                player={p} 
+                isActive={gameState.activePlayerIndex === i} 
+                isDealer={p.isDealer} 
+                showCards={gameState.stage === 'showdown'} 
+                position={positions[i]}
+                onCardClick={p.id === 'user' ? handleCardClick : undefined}
+                hasSqueezed={p.id === 'user' ? squeezedCards : undefined}
+              />
+            );
           })}
         </div>
+
+        {/* Card Squeeze Overlay */}
+        <AnimatePresence>
+          {squeezeCardIndex !== null && user && user.cards[squeezeCardIndex] && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[200] flex items-center justify-center"
+              onClick={() => setSqueezeCardIndex(null)}
+            >
+              <div onClick={(e) => e.stopPropagation()}>
+                <CardSqueeze 
+                  card={user.cards[squeezeCardIndex]} 
+                  onComplete={handleSqueezeComplete}
+                  className="scale-75 md:scale-90 lg:scale-100"
+                />
+              </div>
+              <button
+                onClick={() => setSqueezeCardIndex(null)}
+                className="absolute top-8 right-8 p-3 bg-white/10 hover:bg-white/20 rounded-full border border-white/20 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Interaction Buttons (Emoji/Chat) */}
         <div className="absolute top-4 right-4 flex flex-col gap-2">
