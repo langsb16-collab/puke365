@@ -121,7 +121,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 {!player.isAI && (
                   <motion.div
                     animate={{
-                      y: isPeek ? (isMobile ? -10 : -14) : 0,
+                      y: isPeek ? (isMobile ? -8 : -14) : 0,
                     }}
                     transition={{ type: 'spring', stiffness: 220 }}
                     className="absolute top-0 left-0 w-full h-full pointer-events-none"
@@ -129,11 +129,11 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                       transformOrigin: 'bottom left',
                       transform: isPeek
                         ? isMobile
-                          ? 'perspective(900px) rotateX(50deg) translateY(-6px)'
+                          ? 'perspective(900px) rotateX(48deg) translateY(-8px)'
                           : 'perspective(900px) rotateX(34deg)'
                         : 'none',
                       clipPath: isPeek
-                        ? 'polygon(0 72%, 100% 50%, 100% 100%, 0 100%)'
+                        ? 'polygon(0 78%, 100% 58%, 100% 100%, 0 100%)'
                         : 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
                       background: 'white',
                       borderRadius: '12px',
@@ -142,7 +142,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                         : 'none',
                     }}
                   >
-                    <div className="absolute top-2 left-2 leading-none">
+                    <div className="absolute bottom-2 left-2 leading-none">
                       <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {card?.rank}
                       </div>
