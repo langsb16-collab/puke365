@@ -385,9 +385,9 @@ export default function App() {
       <div className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden">
         {/* Top Navigation Bar - Premium Casino Style */}
         <header className="h-20 bg-black/40 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-8 z-50 shadow-2xl">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4">
-              <div className="relative group">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="relative group scale-50 origin-left">
                 <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <button 
                   onClick={() => setLobbyView('characters')}
@@ -397,7 +397,7 @@ export default function App() {
                 </button>
                 <div className="absolute -bottom-1 -right-1 bg-[#d4af37] text-black text-[8px] font-black px-1.5 py-0.5 rounded-full border border-black uppercase">VIP 42</div>
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col scale-50 origin-left">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-black uppercase tracking-tighter text-white/90 italic">{t(`char_${selectedCharacter.id}`)}</span>
                   <span className="text-[8px] font-bold px-1.5 py-0.5 bg-white/10 rounded text-white/40 uppercase tracking-widest">{t(`style_${selectedCharacter.style.toLowerCase().replace('-', '_')}`)}</span>
@@ -412,7 +412,42 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <button 
+                onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+                className="flex items-center gap-1 md:gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-white/5 border border-white/10 rounded-lg md:rounded-xl hover:bg-white/10 transition-all"
+              >
+                <Globe size={14} className="text-yellow-500 md:w-4 md:h-4" />
+                <span className="text-[10px] md:text-xs font-bold uppercase">{language}</span>
+                <ChevronDown size={12} className={`md:w-3.5 md:h-3.5 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              <AnimatePresence>
+                {isLanguageOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-28 md:w-32 bg-neutral-900 border border-white/10 rounded-lg md:rounded-xl shadow-2xl overflow-hidden z-50"
+                  >
+                    {(['en', 'ko', 'zh'] as const).map((lang) => (
+                      <button
+                        key={lang}
+                        onClick={() => {
+                          setLanguage(lang);
+                          setIsLanguageOpen(false);
+                        }}
+                        className={`w-full px-3 py-2 md:px-4 md:py-3 text-left text-[10px] md:text-xs font-bold uppercase hover:bg-white/5 transition-colors ${language === lang ? 'text-yellow-500' : 'text-white/60'}`}
+                      >
+                        {lang === 'en' ? 'English' : lang === 'ko' ? '한국어' : '中文'}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className="flex items-center gap-4 bg-white/5 px-6 py-2 rounded-2xl border border-white/10 shadow-inner">
               <div className="flex flex-col items-end">
                 <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">{t('balance')}</span>
@@ -425,40 +460,6 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2 md:gap-3">
-              <div className="relative">
-                <button 
-                  onClick={() => setIsLanguageOpen(!isLanguageOpen)}
-                  className="flex items-center gap-1 md:gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-white/5 border border-white/10 rounded-lg md:rounded-xl hover:bg-white/10 transition-all"
-                >
-                  <Globe size={14} className="text-yellow-500 md:w-4 md:h-4" />
-                  <span className="text-[10px] md:text-xs font-bold uppercase">{language}</span>
-                  <ChevronDown size={12} className={`md:w-3.5 md:h-3.5 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
-                </button>
-                
-                <AnimatePresence>
-                  {isLanguageOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-28 md:w-32 bg-neutral-900 border border-white/10 rounded-lg md:rounded-xl shadow-2xl overflow-hidden z-50"
-                    >
-                      {(['en', 'ko', 'zh'] as const).map((lang) => (
-                        <button
-                          key={lang}
-                          onClick={() => {
-                            setLanguage(lang);
-                            setIsLanguageOpen(false);
-                          }}
-                          className={`w-full px-3 py-2 md:px-4 md:py-3 text-left text-[10px] md:text-xs font-bold uppercase hover:bg-white/5 transition-colors ${language === lang ? 'text-yellow-500' : 'text-white/60'}`}
-                        >
-                          {lang === 'en' ? 'English' : lang === 'ko' ? '한국어' : '中文'}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
               <button className="p-1.5 md:p-2.5 bg-white/5 text-white/40 rounded-lg md:rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
                 <Settings size={16} className="md:w-[18px] md:h-[18px]" />
               </button>
