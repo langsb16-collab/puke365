@@ -2,7 +2,7 @@ import React from 'react';
 import { POKER_CHARACTERS } from '../constants';
 import { PokerCharacter } from '../types';
 import { useTranslation } from '../LanguageContext';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CharacterSelectUIProps {
   onSelect: (character: PokerCharacter) => void;

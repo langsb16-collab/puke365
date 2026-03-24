@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
+import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card as CardType } from '../types';
 import { AudioManager } from '../services/AudioManager';
 

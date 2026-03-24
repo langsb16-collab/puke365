@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Coins, Timer, Users, BarChart3, ShoppingBag, ArrowRight, Zap, Star, MessageSquare, Sparkles } from 'lucide-react';
 import { useTranslation } from '../LanguageContext';
 import { PokerCharacter } from '../types';

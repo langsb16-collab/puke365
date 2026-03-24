@@ -3,7 +3,7 @@ import { Player, GameState, BLIND_LEVELS, PlayerAction, GameMode, ChatMessage } 
 import { PokerUtils } from './pokerUtils';
 import { PlayerSeat } from './components/PlayerSeat';
 import { Card } from './components/Card';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Settings, Users, LayoutGrid, ShoppingBag, BarChart3, MessageSquare, Smile, Timer, Globe, ChevronDown, Coins } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useTranslation } from './LanguageContext';

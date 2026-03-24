@@ -1,7 +1,7 @@
 import React from 'react';
 import { Player } from '../types';
 import { Card } from './Card';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { User, Bot, Trophy } from 'lucide-react';
 import { useTranslation } from '../LanguageContext';
 

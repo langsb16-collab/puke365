@@ -3,7 +3,7 @@ import { GameState } from '../types';
 import { PlayerSeat } from './PlayerSeat';
 import { Card } from './Card';
 import { useTranslation } from '../LanguageContext';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface MobileLandscapeProps {
   gameState: GameState;
