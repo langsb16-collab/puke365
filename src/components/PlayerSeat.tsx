@@ -108,52 +108,45 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
             const isPeek = peeked[i];
 
             return (
-              <motion.div
+              <div
                 key={`${player.id}-${i}`}
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
                 className="relative cursor-pointer select-none"
-                animate={{
-                  y: isPeek ? -10 : 0,
-                  scale: isPeek ? 1.04 : 1,
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 260,
-                  damping: 20,
+                style={{
+                  transform: isPeek ? 'scale(1.02)' : 'none',
+                  transition: 'transform 0.3s ease',
                 }}
               >
                 {/* 항상 뒷면 */}
                 <Card card={card} hidden={true} />
 
-                {/* 55% 평면 슬라이드 오픈 */}
+                {/* 55% 완전 평면 슬라이드 */}
                 {!player.isAI && (
-                  <motion.div
-                    animate={{
-                      x: isPeek ? -40 : 0,
-                      y: isPeek ? 6 : 0,
-                      rotate: isPeek ? -6 : 0,
-                      opacity: isPeek ? 1 : 0,
-                    }}
-                    transition={{ type: "spring", stiffness: 240, damping: 20 }}
+                  <div
                     className="absolute top-0 right-0 w-[55%] h-full overflow-hidden pointer-events-none"
+                    style={{
+                      transform: isPeek ? 'translateX(-35px)' : 'translateX(0)',
+                      opacity: isPeek ? 1 : 0,
+                      transition: 'all 0.3s ease',
+                    }}
                   >
-                    {/* 실제 카드 절반 */}
+                    {/* 실제 카드 절반 (완전 평면) */}
                     <div className="w-[200%] h-full flex justify-end">
-                      <div className="w-[55%] h-full bg-white rounded-xl shadow-2xl relative border border-gray-100">
-                        {/* 숫자 + 무늬 */}
-                        <div className="absolute top-2 right-2 text-right leading-none">
-                          <div className={`text-xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className="w-[55%] h-full bg-white rounded-xl shadow-2xl relative border-2 border-gray-200">
+                        {/* 숫자 + 무늬 (평면) */}
+                        <div className="absolute top-3 right-3 text-right leading-none">
+                          <div className={`text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                             {card?.rank}
                           </div>
-                          <div className={`text-lg ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          <div className={`text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
                             {SUIT_SYMBOL[card?.suit || 'spades']}
                           </div>
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </motion.div>
+              </div>
             );
           })}
         </div>

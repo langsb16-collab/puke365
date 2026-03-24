@@ -303,8 +303,8 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
               onClick={() => togglePeek(i)}
               className="cursor-pointer relative"
               style={{
-                transform: isPeek ? 'translateY(-10px) scale(1.04)' : 'none',
-                transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                transform: isPeek ? 'scale(1.02)' : 'none',
+                transition: 'transform 0.3s ease',
               }}
             >
               {/* 항상 뒷면 카드 */}
@@ -328,24 +328,24 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                 </div>
               </div>
 
-              {/* 55% 평면 슬라이드 오픈 */}
+              {/* 55% 완전 평면 슬라이드 */}
               <div
                 className="absolute top-0 right-0 w-[55%] h-full overflow-hidden pointer-events-none"
                 style={{
-                  transform: isPeek ? 'translate(-38px, 6px) rotate(-6deg)' : 'none',
+                  transform: isPeek ? 'translateX(-32px)' : 'translateX(0)',
                   opacity: isPeek ? 1 : 0,
-                  transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transition: 'all 0.3s ease',
                 }}
               >
-                {/* 실제 카드 절반 */}
+                {/* 실제 카드 절반 (완전 평면) */}
                 <div className="w-[200%] h-full flex justify-end">
-                  <div className="w-[55%] h-full bg-white rounded-2xl shadow-2xl relative border border-gray-100">
-                    {/* 숫자 + 무늬 */}
-                    <div className="absolute top-2 right-2 text-right leading-none">
-                      <div className={`text-xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                  <div className="w-[55%] h-full bg-white rounded-2xl shadow-2xl relative border-2 border-gray-200">
+                    {/* 숫자 + 무늬 (평면) */}
+                    <div className="absolute top-3 right-3 text-right leading-none">
+                      <div className={`text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {card?.rank}
                       </div>
-                      <div className={`text-lg ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className={`text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {SUIT_SYMBOL[card?.suit || 'spades']}
                       </div>
                     </div>
