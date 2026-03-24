@@ -297,24 +297,13 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
           const shouldShowCard = gameState.stage === 'showdown' || squeezedCards.has(i);
           
           return (
-            <motion.div
+            <div
               key={i}
               onClick={() => {
                 handleCardClick?.(i);
                 if (navigator.vibrate) navigator.vibrate(15);
               }}
               className="cursor-pointer relative"
-              animate={{
-                rotate: squeezedCards.has(i) ? (i === 0 ? -6 : 6) : 0,
-                y: squeezedCards.has(i) ? -14 : 0,
-                scale: squeezedCards.has(i) ? 1.06 : 1,
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 18 }}
-              whileHover={{ scale: 1.05, y: -12 }}
-              whileTap={{ scale: 0.98 }}
-              style={{
-                filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.8))',
-              }}
             >
               {shouldShowCard ? (
                 // 오픈된 카드 (Hello Pokers 스타일)
@@ -367,7 +356,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                   </div>
                 </div>
               )}
-            </motion.div>
+            </div>
           );
         })}
       </div>
