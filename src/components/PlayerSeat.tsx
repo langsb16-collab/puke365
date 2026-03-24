@@ -25,6 +25,9 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
   hasSqueezed = new Set()
 }) => {
   const { t } = useTranslation();
+  
+  if (!player) return null;
+  
   const isFolded = player.isFolded;
   
   return (

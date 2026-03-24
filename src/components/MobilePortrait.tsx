@@ -31,6 +31,8 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
   squeezedCards = new Set()
 }) => {
   const { t } = useTranslation();
+  
+  if (!gameState || !user) return null;
 
   const SUIT_SYMBOLS: Record<string, string> = {
     hearts: '♥',

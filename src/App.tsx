@@ -812,7 +812,9 @@ export default function App() {
     );
   }
 
-  const user = gameState.players.find(p => p.id === 'user')!;
+  const user = gameState.players.find(p => p.id === 'user');
+  if (!user) return null;
+  
   const isUserTurn = gameState.activePlayerIndex === gameState.players.findIndex(p => p.id === 'user') && !isProcessing;
 
   // 🚨 모바일 전용 UI 분기
