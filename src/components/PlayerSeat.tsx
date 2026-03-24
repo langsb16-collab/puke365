@@ -11,6 +11,7 @@ interface PlayerSeatProps {
   isDealer: boolean;
   showCards: boolean;
   position: string;
+  gameStage?: string;
 }
 
 export const PlayerSeat: React.FC<PlayerSeatProps> = ({ 
@@ -18,26 +19,27 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
   isActive, 
   isDealer, 
   showCards,
-  position
+  position,
+  gameStage = ''
 }) => {
   const { t } = useTranslation();
-  const [squeezed, setSqueezed] = useState(false);
+  const [peeked, setPeeked] = useState<Record<number, boolean>>({});
   
   const isFolded = player?.isFolded || false;
   
   if (!player) return null;
 
-  const handleSqueeze = () => {
-    setSqueezed(prev => !prev);
+  const togglePeek = (i: number) => {
+    setPeeked(prev => ({ ...prev, [i]: !prev[i] }));
 
-    // 사운드
-    const audio = new Audio("/sounds/flip.mp3");
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
+    const a = new Audio("/sounds/flip.mp3");
+    a.currentTime = 0;
+    a.play().catch(() => {});
 
-    // 햅틱
     if (navigator.vibrate) navigator.vibrate(15);
   };
+
+  const isShowdown = gameStage === 'showdown';
   
   return (
     <div className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${position}`}>
@@ -86,46 +88,60 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         )}
 
         {/* Cards */}
-        <div className="flex -space-x-4 mb-1">
-          {(player?.cards ?? []).map((card, i) => (
-            <motion.div
-              key={`${player.id}-card-${i}`}
-              onClick={!player.isAI ? handleSqueeze : undefined}
-              className={!player.isAI ? "cursor-pointer relative" : "relative"}
-              animate={{
-                rotate: squeezed ? (i === 0 ? -8 : 8) : 0,
-                y: squeezed ? -14 : 0,
-                scale: squeezed ? 1.05 : 1,
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 18 }}
-            >
-              <Card
-                card={card}
-                hidden={!showCards && player.isAI}
-              />
+        <div className="flex -space-x-5 mb-1">
+          {(player?.cards ?? []).map((card, i) => {
+            const isOpen = isShowdown;
+            const isPeek = peeked[i];
 
-              {/* 코너 숫자 표시 */}
-              {!player.isAI && (
-                <motion.div
-                  animate={{
-                    x: squeezed ? -8 : 0,
-                    y: squeezed ? 8 : 0,
-                    rotate: squeezed ? -15 : 0,
-                    opacity: squeezed ? 1 : 0,
-                  }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className="absolute top-0 right-0 w-10 h-10 bg-white rounded-bl-xl flex items-center justify-center shadow-lg pointer-events-none"
-                  style={{
-                    clipPath: "polygon(0 0, 100% 0, 100% 100%)",
-                  }}
-                >
-                  <span className="text-xs font-bold text-black">
-                    {card?.rank}
-                  </span>
-                </motion.div>
-              )}
-            </motion.div>
-          ))}
+            return (
+              <motion.div
+                key={`${player.id}-${i}`}
+                onClick={!player.isAI ? () => togglePeek(i) : undefined}
+                className="relative cursor-pointer select-none"
+                animate={{
+                  rotate: isPeek ? (i === 0 ? -10 : 10) : 0,
+                  y: isPeek ? -16 : 0,
+                  scale: isPeek ? 1.06 : 1,
+                }}
+                transition={{ type: "spring", stiffness: 320, damping: 18 }}
+              >
+                {/* 기본: 항상 뒷면 / 쇼다운만 오픈 */}
+                <Card card={card} hidden={!isOpen} />
+
+                {/* 1/2 코너 곡면 휘어짐 + 숫자 노출 */}
+                {!player.isAI && !isOpen && (
+                  <motion.div
+                    animate={{
+                      x: isPeek ? -16 : 0,
+                      y: isPeek ? 16 : 0,
+                      rotate: isPeek ? -22 : 0,
+                      opacity: isPeek ? 1 : 0,
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="absolute top-0 right-0 w-[50%] h-[50%] pointer-events-none flex items-start justify-end"
+                    style={{
+                      clipPath: "polygon(0 0, 100% 0, 100% 100%)",
+                      transformOrigin: "top right",
+                      transform: isPeek
+                        ? "perspective(800px) rotateX(30deg) rotateY(-10deg) skewY(-12deg)"
+                        : "none",
+                      background: "white",
+                      borderBottomLeftRadius: "14px",
+                      boxShadow: isPeek
+                        ? "0px 16px 30px rgba(0,0,0,0.6)"
+                        : "none",
+                    }}
+                  >
+                    <div className="pr-2 pt-2">
+                      <span className="text-base font-bold text-black leading-none">
+                        {card?.rank}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Player Info Card */}
