@@ -384,7 +384,45 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden">
         {/* Top Navigation Bar - Premium Casino Style */}
-        <header className="h-20 bg-black/40 backdrop-blur-2xl border-b border-white/5 flex items-center px-8 z-50 shadow-2xl">
+        {/* Fixed Language Selector - Always Visible on All Screens */}
+        <div className="fixed top-4 right-4 z-[100]">
+          <div className="relative">
+            <button 
+              onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+              className="flex items-center gap-2 px-3 py-2 bg-black/60 backdrop-blur-xl border border-yellow-500/30 rounded-xl hover:bg-black/80 hover:border-yellow-500/50 transition-all shadow-lg shadow-yellow-500/20"
+            >
+              <Globe size={16} className="text-yellow-500" />
+              <span className="text-xs font-bold uppercase text-white">{language}</span>
+              <ChevronDown size={14} className={`text-yellow-500 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            <AnimatePresence>
+              {isLanguageOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute right-0 mt-2 w-32 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[110]"
+                >
+                  {(['en', 'ko', 'zh'] as const).map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => {
+                        setLanguage(lang);
+                        setIsLanguageOpen(false);
+                      }}
+                      className={`w-full px-4 py-3 text-left text-xs font-bold uppercase hover:bg-white/5 transition-colors ${language === lang ? 'text-yellow-500' : 'text-white/60'}`}
+                    >
+                      {lang === 'en' ? 'English' : lang === 'ko' ? '한국어' : '中文'}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <header className="h-20 bg-black/40 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-8 z-50 shadow-2xl">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="relative group scale-[0.65] origin-left">
@@ -412,51 +450,14 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex-1 flex items-center justify-center">
-            <div className="relative">
-              <button 
-                onClick={() => setIsLanguageOpen(!isLanguageOpen)}
-                className="flex items-center gap-1 md:gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-white/5 border border-white/10 rounded-lg md:rounded-xl hover:bg-white/10 transition-all"
-              >
-                <Globe size={14} className="text-yellow-500 md:w-4 md:h-4" />
-                <span className="text-[10px] md:text-xs font-bold uppercase">{language}</span>
-                <ChevronDown size={12} className={`md:w-3.5 md:h-3.5 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              <AnimatePresence>
-                {isLanguageOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-28 md:w-32 bg-neutral-900 border border-white/10 rounded-lg md:rounded-xl shadow-2xl overflow-hidden z-50"
-                  >
-                    {(['en', 'ko', 'zh'] as const).map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() => {
-                          setLanguage(lang);
-                          setIsLanguageOpen(false);
-                        }}
-                        className={`w-full px-3 py-2 md:px-4 md:py-3 text-left text-[10px] md:text-xs font-bold uppercase hover:bg-white/5 transition-colors ${language === lang ? 'text-yellow-500' : 'text-white/60'}`}
-                      >
-                        {lang === 'en' ? 'English' : lang === 'ko' ? '한국어' : '中文'}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className="flex items-center gap-3 bg-white/5 px-6 py-2 rounded-2xl border border-white/10 shadow-inner min-w-[240px]">
-              <div className="flex items-center gap-2 w-full">
-                <Coins size={16} className="text-yellow-500 flex-shrink-0" />
-                <div className="flex flex-col flex-1">
-                  <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">{t('balance')}</span>
-                  <span className="text-lg font-black text-yellow-500 font-mono tracking-tighter whitespace-nowrap">{gameState.players[0].chips.toLocaleString()}{t('currency')}</span>
-                </div>
-                <button className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center text-black hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20 flex-shrink-0">+</button>
+          <div className="flex items-center gap-3 bg-white/5 px-6 py-2 rounded-2xl border border-white/10 shadow-inner min-w-[240px]">
+            <div className="flex items-center gap-2 w-full">
+              <Coins size={16} className="text-yellow-500 flex-shrink-0" />
+              <div className="flex flex-col flex-1">
+                <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">{t('balance')}</span>
+                <span className="text-lg font-black text-yellow-500 font-mono tracking-tighter whitespace-nowrap">{gameState.players[0].chips.toLocaleString()}{t('currency')}</span>
               </div>
+              <button className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center text-black hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20 flex-shrink-0">+</button>
             </div>
           </div>
         </header>
