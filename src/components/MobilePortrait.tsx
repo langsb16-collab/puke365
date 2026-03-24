@@ -184,8 +184,21 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
         {gameState.players.map((p, i) => {
           if (p.id === 'user') return null;
           
-          // 카드 공개 조건: showdown 단계이거나 플레이어가 본인인 경우
+          // 🎯 카드 공개 조건 (핵심 로직)
+          // 1. showdown 단계 → 폴드하지 않은 플레이어만 공개
+          // 2. 그 외 모든 경우 → 카드 뒷면
           const shouldShowCards = gameState.stage === 'showdown' && !p.isFolded;
+          
+          // 디버깅
+          if (i === 1) {
+            console.log('🎴 Card Visibility Debug:', {
+              playerName: p.name,
+              stage: gameState.stage,
+              isFolded: p.isFolded,
+              shouldShowCards,
+              hasCards: p.cards?.length || 0
+            });
+          }
           
           return (
             <div 
