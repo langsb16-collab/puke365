@@ -46,16 +46,16 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
     spades: 'text-gray-900',
   };
 
-  // 플레이어 위치 (타원 외곽 따라 배치)
+  // 플레이어 위치 (타원 외곽 따라 배치 - 더 정확한 좌표)
   const positions = [
-    { top: '85%', left: '50%', transform: '-translate-x-1/2' }, // 0: 본인
-    { top: '65%', left: '8%' },   // 1: 좌하
-    { top: '40%', left: '5%' },   // 2: 좌중
-    { top: '18%', left: '12%' },  // 3: 좌상
-    { top: '8%', left: '50%', transform: '-translate-x-1/2' },  // 4: 상단
-    { top: '18%', right: '12%' }, // 5: 우상
-    { top: '40%', right: '5%' },  // 6: 우중
-    { top: '65%', right: '8%' },  // 7: 우하
+    { top: '88%', left: '50%', transform: '-translate-x-1/2' }, // 0: 본인
+    { top: '72%', left: '6%' },   // 1: 좌하
+    { top: '48%', left: '3%' },   // 2: 좌중
+    { top: '22%', left: '10%' },  // 3: 좌상
+    { top: '6%', left: '50%', transform: '-translate-x-1/2' },  // 4: 상단
+    { top: '22%', right: '10%' }, // 5: 우상
+    { top: '48%', right: '3%' },  // 6: 우중
+    { top: '72%', right: '6%' },  // 7: 우하
   ];
 
   return (
@@ -85,13 +85,13 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
 
       {/* ========== 메인 테이블 영역 ========== */}
       <div className="flex-1 flex items-center justify-center relative">
-        {/* 타원 테이블 (Hello Pokers 스타일) */}
+        {/* 타원 테이블 (Hello Pokers 스타일 - 더 길게) */}
         <div 
           className="relative"
           style={{
-            width: '90%',
-            maxWidth: '420px',
-            height: '75vh',
+            width: '92%',
+            maxWidth: '440px',
+            height: '82vh',
           }}
         >
           {/* 테이블 배경 */}
@@ -127,7 +127,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
           <div 
             className="absolute z-30"
             style={{
-              top: '48%',
+              top: '44%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
             }}
@@ -151,7 +151,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
             <div 
               className="absolute z-20"
               style={{
-                top: '32%',
+                top: '28%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
               }}
@@ -308,15 +308,15 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
               {shouldShowCard ? (
                 // 오픈된 카드 (Hello Pokers 스타일)
                 <div 
-                  className="w-[80px] h-[110px] bg-white rounded-2xl shadow-2xl flex flex-col items-center justify-center border-2 border-gray-100 relative overflow-hidden"
+                  className="w-16 h-[88px] bg-white rounded-2xl shadow-2xl flex flex-col items-center justify-center border-2 border-gray-100 relative overflow-hidden"
                   style={{
                     boxShadow: '0 15px 50px rgba(0,0,0,0.7), 0 0 30px rgba(255,255,255,0.2)',
                   }}
                 >
-                  <span className={`text-5xl font-black ${SUIT_COLORS[card.suit]}`}>
+                  <span className={`text-4xl font-black ${SUIT_COLORS[card.suit]}`}>
                     {card.rank}
                   </span>
-                  <span className={`text-4xl ${SUIT_COLORS[card.suit]}`}>
+                  <span className={`text-3xl ${SUIT_COLORS[card.suit]}`}>
                     {SUIT_SYMBOLS[card.suit]}
                   </span>
                   
@@ -330,7 +330,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
               ) : (
                 // 뒷면 카드 (Hello Pokers 오렌지 스타일)
                 <div 
-                  className="w-[80px] h-[110px] bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 rounded-2xl shadow-2xl flex items-center justify-center border-3 border-orange-400/50 relative overflow-hidden"
+                  className="w-16 h-[88px] bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 rounded-2xl shadow-2xl flex items-center justify-center border-3 border-orange-400/50 relative overflow-hidden"
                 >
                   {/* 패턴 */}
                   <div className="absolute inset-0 opacity-30">
@@ -346,12 +346,12 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                   
                   {/* 중앙 심볼 */}
                   <div className="relative z-10 flex flex-col items-center gap-1">
-                    <div className="text-yellow-200/60 text-4xl">👑</div>
-                    <div className="text-yellow-200/50 text-xs font-black italic tracking-wider">CHUANQI</div>
+                    <div className="text-yellow-200/60 text-3xl">👑</div>
+                    <div className="text-yellow-200/50 text-[10px] font-black italic tracking-wider">CHUANQI</div>
                   </div>
                   
                   {/* TAP 인디케이터 */}
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-[10px] font-black px-3 py-1 rounded-full animate-bounce shadow-xl z-30">
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-[9px] font-black px-2.5 py-0.5 rounded-full animate-bounce shadow-xl z-30">
                     TAP
                   </div>
                 </div>
