@@ -474,7 +474,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="max-w-7xl mx-auto space-y-8"
+                className="w-full max-w-none px-4 lg:px-8 space-y-8"
               >
                 {/* Global Jackpot Banner */}
                 <div className="relative h-24 rounded-3xl bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border border-yellow-500/30 overflow-hidden flex items-center justify-between px-12 shadow-[0_0_50px_rgba(234,179,8,0.1)]">
@@ -507,6 +507,14 @@ export default function App() {
                         onClick={() => setLobbyView('tournaments')}
                         className="relative h-72 rounded-[40px] bg-gradient-to-br from-red-600 to-red-950 p-10 flex flex-col justify-end overflow-hidden shadow-2xl group border border-red-500/30"
                       >
+                        {/* Poker Table Background Image */}
+                        <div className="absolute inset-0 opacity-30 group-hover:opacity-40 transition-opacity duration-700"
+                             style={{
+                               backgroundImage: 'url(https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=800&q=80)',
+                               backgroundSize: 'cover',
+                               backgroundPosition: 'center'
+                             }} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-red-950 via-red-900/50 to-transparent" />
                         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
                           <Trophy size={300} className="text-white -mr-10 -mt-10" />
                         </div>
@@ -526,6 +534,14 @@ export default function App() {
                         onClick={() => initGame('cash')}
                         className="relative h-72 rounded-[40px] bg-gradient-to-br from-emerald-600 to-emerald-950 p-10 flex flex-col justify-end overflow-hidden shadow-2xl group border border-emerald-500/30"
                       >
+                        {/* Poker Chips Background Image */}
+                        <div className="absolute inset-0 opacity-30 group-hover:opacity-40 transition-opacity duration-700"
+                             style={{
+                               backgroundImage: 'url(https://images.unsplash.com/photo-1571988840298-3b5301d5109b?w=800&q=80)',
+                               backgroundSize: 'cover',
+                               backgroundPosition: 'center'
+                             }} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-emerald-900/50 to-transparent" />
                         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
                           <Coins size={300} className="text-white -mr-10 -mt-10" />
                         </div>
@@ -542,10 +558,10 @@ export default function App() {
                     {/* Secondary Game Modes */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                       {[
-                        { id: 'sit-and-go', title: t('sitAndGo'), icon: <Timer />, color: 'from-blue-600 to-blue-950', action: () => initGame('sit-and-go') },
-                        { id: 'private', title: t('privateTable'), icon: <Users />, color: 'from-purple-600 to-purple-950', action: () => null },
-                        { id: 'stats', title: t('stats'), icon: <BarChart3 />, color: 'from-zinc-700 to-zinc-900', action: () => setLobbyView('stats') },
-                        { id: 'shop', title: t('shop'), icon: <ShoppingBag />, color: 'from-yellow-600 to-yellow-900', action: () => setLobbyView('shop') },
+                        { id: 'sit-and-go', title: t('sitAndGo'), icon: <Timer />, color: 'from-blue-600 to-blue-950', action: () => initGame('sit-and-go'), bg: 'https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=400&q=80' },
+                        { id: 'private', title: t('privateTable'), icon: <Users />, color: 'from-purple-600 to-purple-950', action: () => null, bg: 'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=400&q=80' },
+                        { id: 'stats', title: t('stats'), icon: <BarChart3 />, color: 'from-zinc-700 to-zinc-900', action: () => setLobbyView('stats'), bg: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80' },
+                        { id: 'shop', title: t('shop'), icon: <ShoppingBag />, color: 'from-yellow-600 to-yellow-900', action: () => setLobbyView('shop'), bg: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=400&q=80' },
                       ].map(mode => (
                         <motion.button
                           key={mode.id}
@@ -554,9 +570,16 @@ export default function App() {
                           onClick={mode.action}
                           className={`relative h-32 rounded-3xl bg-gradient-to-br ${mode.color} p-6 flex flex-col justify-between overflow-hidden shadow-xl border border-white/10 group`}
                         >
-                          <div className="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-500">{mode.icon}</div>
-                          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-2">{mode.icon}</div>
-                          <h4 className="text-sm font-black uppercase tracking-tighter italic leading-none">{mode.title}</h4>
+                          <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity"
+                               style={{
+                                 backgroundImage: `url(${mode.bg})`,
+                                 backgroundSize: 'cover',
+                                 backgroundPosition: 'center'
+                               }} />
+                          <div className="absolute inset-0 bg-gradient-to-br ${mode.color} opacity-70" />
+                          <div className="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-500 z-10">{mode.icon}</div>
+                          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-2 relative z-10">{mode.icon}</div>
+                          <h4 className="text-sm font-black uppercase tracking-tighter italic leading-none relative z-10">{mode.title}</h4>
                         </motion.button>
                       ))}
                     </div>
