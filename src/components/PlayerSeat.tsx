@@ -102,14 +102,8 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
           </motion.div>
         )}
 
-        {/* Cards - 바닥에 눕힌 평면 */}
-        <div 
-          className="flex -space-x-5 mb-1"
-          style={{ 
-            transform: 'perspective(800px) rotateX(55deg)',
-            transformOrigin: 'center bottom'
-          }}
-        >
+        {/* Cards */}
+        <div className="flex -space-x-5 mb-1">
           {(player?.cards ?? []).map((card, i) => {
             const isPeek = peeked[i];
 
@@ -119,41 +113,48 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
                 className="relative cursor-pointer select-none"
                 style={{
-                  transform: isPeek ? 'scale(1.04)' : 'none',
-                  transition: 'transform 0.3s ease',
+                  perspective: '1200px',
+                  transformStyle: 'preserve-3d'
                 }}
               >
-                {/* 뒷면 카드 (항상 표시) */}
-                <div className="w-16 h-24 sm:w-20 sm:h-28 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-600 rounded-lg shadow-2xl border-2 border-orange-400 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl">👑</div>
-                </div>
+                <motion.div
+                  animate={{
+                    rotateX: isPeek ? 65 : 0,
+                    scale: isPeek ? 1.2 : 1,
+                    y: isPeek ? -15 : 0
+                  }}
+                  transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    transformOrigin: 'center bottom'
+                  }}
+                >
+                  {/* 뒷면 */}
+                  <div className="w-16 h-24 sm:w-20 sm:h-28 bg-gradient-to-br from-orange-600 to-orange-500 rounded-lg shadow-2xl border-2 border-orange-400 relative">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl">👑</div>
+                  </div>
 
-                {/* 쪼이기: 절반 슬라이드 오픈 */}
-                {!player.isAI && isPeek && (
-                  <motion.div
-                    initial={{ x: 0, opacity: 0 }}
-                    animate={{ x: -35, opacity: 1 }}
-                    exit={{ x: 0, opacity: 0 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                    className="absolute top-0 right-0 w-[55%] h-full overflow-hidden pointer-events-none"
-                  >
-                    {/* 앞면 카드 절반 */}
-                    <div className="w-[182%] h-full flex justify-end">
-                      <div className="w-16 h-24 sm:w-20 sm:h-28 bg-white rounded-lg shadow-2xl border-2 border-gray-300 relative">
-                        {/* 우측 상단 숫자+무늬 */}
-                        <div className="absolute top-2 right-2 text-right leading-none">
-                          <div className={`text-2xl sm:text-3xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                            {card?.rank}
-                          </div>
-                          <div className={`text-xl sm:text-2xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                            {SUIT_SYMBOL[card?.suit || 'spades']}
-                          </div>
+                  {/* 앞면 */}
+                  {!player.isAI && isPeek && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="absolute inset-0 w-16 h-24 sm:w-20 sm:h-28 bg-white rounded-lg shadow-2xl border-2 border-gray-300"
+                      style={{
+                        clipPath: 'polygon(0 0, 55% 0, 55% 100%, 0 100%)'
+                      }}
+                    >
+                      <div className="absolute top-2 left-2 leading-none">
+                        <div className={`text-3xl sm:text-4xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          {card?.rank}
+                        </div>
+                        <div className={`text-2xl sm:text-3xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          {SUIT_SYMBOL[card?.suit || 'spades']}
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
+                    </motion.div>
+                  )}
+                </motion.div>
               </div>
             );
           })}
