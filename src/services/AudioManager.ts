@@ -2,10 +2,35 @@ export class AudioManager {
   private static instance: AudioManager;
   private audioContext: AudioContext | null = null;
   private sounds: Record<string, AudioBuffer> = {};
+  private isInitialized: boolean = false;
 
   private constructor() {
-    if (typeof window !== 'undefined') {
+    // AudioContext는 사용자 상호작용 후에만 생성 (lazy initialization)
+  }
+
+  private initAudioContext() {
+    if (this.isInitialized || typeof window === 'undefined') return;
+    
+    try {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.isInitialized = true;
+    } catch (e) {
+      console.warn('AudioContext initialization failed (autoplay policy):', e);
+      this.isInitialized = false;
+    }
+  }
+
+  private async resumeAudioContext() {
+    if (!this.audioContext) {
+      this.initAudioContext();
+    }
+    
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      try {
+        await this.audioContext.resume();
+      } catch (e) {
+        console.warn('AudioContext resume failed:', e);
+      }
     }
   }
 
@@ -17,43 +42,52 @@ export class AudioManager {
   }
 
   public async loadSound(name: string, url: string) {
+    this.initAudioContext();
     if (!this.audioContext) return;
+    
     try {
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
       this.sounds[name] = audioBuffer;
     } catch (e) {
-      console.error(`Failed to load sound: ${name}`, e);
+      console.warn(`Failed to load sound: ${name}`, e);
     }
   }
 
-  public play(name: string, volume: number = 0.5) {
+  public async play(name: string, volume: number = 0.5) {
+    await this.resumeAudioContext();
     if (!this.audioContext || !this.sounds[name]) return;
 
-    const source = this.audioContext.createBufferSource();
-    source.buffer = this.sounds[name];
+    try {
+      const source = this.audioContext.createBufferSource();
+      source.buffer = this.sounds[name];
 
-    const gainNode = this.audioContext.createGain();
-    gainNode.gain.value = volume;
+      const gainNode = this.audioContext.createGain();
+      gainNode.gain.value = volume;
 
-    source.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
+      source.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
 
-    source.start(0);
+      source.start(0);
+    } catch (e) {
+      // Silently fail if audio playback is blocked
+    }
   }
 
   // Helper for common casino sounds using synthesized tones if files aren't available
-  public playSynthesized(type: 'chip' | 'card' | 'win' | 'click' | 'welcome' | 'tudum') {
+  public async playSynthesized(type: 'chip' | 'card' | 'win' | 'click' | 'welcome' | 'tudum') {
+    await this.resumeAudioContext();
     if (!this.audioContext) return;
 
-    const osc = this.audioContext.createOscillator();
-    const gain = this.audioContext.createGain();
+    try {
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
 
-    osc.connect(gain);
-    gain.connect(this.audioContext.destination);
+      osc.connect(gain);
+      gain.connect(this.audioContext.destination);
 
-    const now = this.audioContext.currentTime;
+      const now = this.audioContext.currentTime;
 
     switch (type) {
       case 'welcome':
@@ -137,6 +171,9 @@ export class AudioManager {
         osc.start(now);
         osc.stop(now + 0.02);
         break;
+    }
+    } catch (e) {
+      // Silently fail if audio playback is blocked
     }
   }
 }
