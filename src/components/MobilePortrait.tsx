@@ -31,20 +31,6 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
   squeezedCards = new Set()
 }) => {
   const { t } = useTranslation();
-  
-  // 디버깅: 게임 상태 확인
-  React.useEffect(() => {
-    console.log('🎮 MobilePortrait Debug:', {
-      stage: gameState.stage,
-      players: gameState.players.map(p => ({
-        id: p.id,
-        name: p.name,
-        isAI: p.isAI,
-        hasCards: p.cards?.length || 0,
-        isFolded: p.isFolded
-      }))
-    });
-  }, [gameState.stage, gameState.players]);
 
   // 플레이어 위치 (헬로포커스 스타일)
   const positions = [
@@ -188,17 +174,6 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
           // 1. showdown 단계 → 폴드하지 않은 플레이어만 공개
           // 2. 그 외 모든 경우 → 카드 뒷면
           const shouldShowCards = gameState.stage === 'showdown' && !p.isFolded;
-          
-          // 디버깅
-          if (i === 1) {
-            console.log('🎴 Card Visibility Debug:', {
-              playerName: p.name,
-              stage: gameState.stage,
-              isFolded: p.isFolded,
-              shouldShowCards,
-              hasCards: p.cards?.length || 0
-            });
-          }
           
           return (
             <div 
