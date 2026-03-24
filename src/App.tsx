@@ -384,10 +384,10 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden">
         {/* Top Navigation Bar - Premium Casino Style */}
-        <header className="h-20 bg-black/40 backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-8 z-50 shadow-2xl">
+        <header className="h-20 bg-black/40 backdrop-blur-2xl border-b border-white/5 flex items-center px-8 z-50 shadow-2xl">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <div className="relative group scale-50 origin-left">
+              <div className="relative group scale-[0.65] origin-left">
                 <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <button 
                   onClick={() => setLobbyView('characters')}
@@ -397,7 +397,7 @@ export default function App() {
                 </button>
                 <div className="absolute -bottom-1 -right-1 bg-[#d4af37] text-black text-[8px] font-black px-1.5 py-0.5 rounded-full border border-black uppercase">VIP 42</div>
               </div>
-              <div className="flex flex-col scale-50 origin-left">
+              <div className="flex flex-col scale-[0.65] origin-left">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-black uppercase tracking-tighter text-white/90 italic">{t(`char_${selectedCharacter.id}`)}</span>
                   <span className="text-[8px] font-bold px-1.5 py-0.5 bg-white/10 rounded text-white/40 uppercase tracking-widest">{t(`style_${selectedCharacter.style.toLowerCase().replace('-', '_')}`)}</span>
@@ -412,7 +412,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex-1 flex items-center justify-center">
             <div className="relative">
               <button 
                 onClick={() => setIsLanguageOpen(!isLanguageOpen)}
@@ -448,15 +448,15 @@ export default function App() {
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/5 px-6 py-2 rounded-2xl border border-white/10 shadow-inner">
+            <div className="flex items-center gap-3 bg-white/5 px-4 py-1.5 rounded-2xl border border-white/10 shadow-inner scale-80">
               <div className="flex flex-col items-end">
                 <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">{t('balance')}</span>
                 <div className="flex items-center gap-2">
-                  <Coins size={14} className="text-yellow-500" />
-                  <span className="text-lg font-black text-yellow-500 font-mono tracking-tighter">{gameState.players[0].chips.toLocaleString()}{t('currency')}</span>
+                  <Coins size={12} className="text-yellow-500" />
+                  <span className="text-base font-black text-yellow-500 font-mono tracking-tighter">{gameState.players[0].chips.toLocaleString()}{t('currency')}</span>
                 </div>
               </div>
-              <button className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center text-black hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20">+</button>
+              <button className="w-7 h-7 rounded-lg bg-yellow-500 flex items-center justify-center text-black hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20 text-sm">+</button>
             </div>
 
             <div className="flex items-center gap-2 md:gap-3">
