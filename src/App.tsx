@@ -984,7 +984,7 @@ export default function App() {
           {/* Community Cards - Responsive sizing */}
           <div className="flex gap-1 sm:gap-2 md:gap-3 lg:gap-4 z-10">
             <AnimatePresence>
-              {gameState.communityCards.map((card, i) => <Card key={`community-${i}`} card={card} className="shadow-2xl w-10 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24" />)}
+              {gameState.communityCards.map((card, i) => <Card key={`community-${i}`} card={card} hidden={true} className="shadow-2xl w-10 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24" />)}
               {Array.from({ length: 5 - gameState.communityCards.length }).map((_, i) => <div key={`empty-${i}`} className="w-10 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 lg:w-16 lg:h-24 rounded-lg border-2 border-white/5 bg-black/20" />)}
             </AnimatePresence>
           </div>
