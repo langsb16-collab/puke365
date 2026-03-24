@@ -130,16 +130,16 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                       transformOrigin: 'bottom center',
                       transform: isPeek
                         ? isMobile
-                          ? 'perspective(900px) rotateX(55deg)'
-                          : 'perspective(900px) rotateX(25deg)'
+                          ? 'perspective(1000px) rotateX(68deg)'
+                          : 'perspective(900px) rotateX(32deg)'
                         : 'none',
                       clipPath: isPeek
-                        ? 'polygon(0 60%, 100% 40%, 100% 100%, 0% 100%)'
+                        ? 'polygon(0 65%, 100% 45%, 100% 100%, 0% 100%)'
                         : 'polygon(0 100%, 100% 100%, 100% 100%, 0% 100%)',
                     }}
                   >
                     <div className="w-full h-full bg-white rounded-xl shadow-2xl relative">
-                      <div className="absolute top-3 left-3 leading-none">
+                      <div className="absolute top-2 left-2 leading-none">
                         <div className={`text-xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                           {card?.rank}
                         </div>
