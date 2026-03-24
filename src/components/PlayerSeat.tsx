@@ -86,20 +86,20 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
               return (
                 <div 
                   key={`${player.id}-card-${i}`}
-                  onClick={() => !player.isAI && !showCards && !hasSqueezed.has(i) ? onCardClick?.(i) : undefined}
-                  className={!player.isAI && !showCards && !hasSqueezed.has(i) ? 'cursor-pointer' : ''}
+                  onClick={() => !player.isAI && !showCards ? onCardClick?.(i) : undefined}
+                  className={!player.isAI && !showCards ? 'cursor-pointer relative' : 'relative'}
                 >
                   <Card 
                     card={card} 
                     hidden={!shouldShowCard}
                     className={`
                       ${player.isAI ? (i === 1 ? 'rotate-3' : '-rotate-3') : (i === 0 ? 'rotate-3' : '-rotate-3')}
-                      ${!player.isAI && !showCards && !hasSqueezed.has(i) ? 'hover:scale-110 hover:-translate-y-2 transition-transform' : ''}
+                      ${!player.isAI && !showCards ? 'hover:scale-110 hover:-translate-y-2 transition-transform' : ''}
                     `}
                   />
-                  {!player.isAI && !showCards && !hasSqueezed.has(i) && (
+                  {!player.isAI && !showCards && (
                     <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[8px] font-black px-1 rounded animate-bounce z-30">
-                      TAP
+                      {hasSqueezed.has(i) ? '👁️' : 'TAP'}
                     </div>
                   )}
                 </div>
