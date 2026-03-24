@@ -26,9 +26,9 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
 }) => {
   const { t } = useTranslation();
   
-  if (!player) return null;
+  const isFolded = player?.isFolded || false;
   
-  const isFolded = player.isFolded;
+  if (!player) return null;
   
   return (
     <div className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${position}`}>

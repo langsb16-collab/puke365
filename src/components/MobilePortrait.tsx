@@ -31,8 +31,6 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
   squeezedCards = new Set()
 }) => {
   const { t } = useTranslation();
-  
-  if (!gameState || !user) return null;
 
   const SUIT_SYMBOLS: Record<string, string> = {
     hearts: '♥',
@@ -59,6 +57,8 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
     { top: '48%', right: '3%' },  // 6: 우중
     { top: '72%', right: '6%' },  // 7: 우하
   ];
+
+  if (!gameState || !user) return <div className="h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
 
   return (
     <div 

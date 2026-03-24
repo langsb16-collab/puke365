@@ -393,9 +393,8 @@ export default function App() {
     }, 1500 + Math.random() * 2000); // Random delay between 1.5-3.5 seconds
   };
 
-  if (!gameState) return null;
-
-  if (!gameState) return null;
+  // Early return AFTER all hooks
+  if (!gameState) return <div>Loading...</div>;
 
   if (gameState.mode === 'lobby') {
     return (
@@ -814,16 +813,13 @@ export default function App() {
     );
   }
 
-  const user = gameState?.players?.find(p => p?.id === 'user');
-  if (!user) {
-    console.error('User not found in players');
-    return null;
-  }
-  
-  const isUserTurn = gameState?.activePlayerIndex === gameState?.players?.findIndex(p => p?.id === 'user') && !isProcessing;
+  const user = gameState?.players?.find(p => p?.id === 'user') || null;
+  const isUserTurn = user && gameState?.activePlayerIndex === gameState?.players?.findIndex(p => p?.id === 'user') && !isProcessing;
 
   // 🚨 모바일 전용 UI 분기
   if (deviceType === 'mobile') {
+    if (!user) return <div>Loading user...</div>;
+    
     return (
       <>
         {/* Card Squeeze Overlay */}
