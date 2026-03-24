@@ -817,7 +817,8 @@ export default function App() {
 
   // 🚨 모바일 전용 UI 분기
   if (deviceType === 'mobile') {
-    if (!user) return <div>Loading user...</div>;
+    // Safe fallback for user
+    const safeUser = user ?? { id: 'user', cards: [], chips: 0, name: 'User', isFolded: false, isAI: false };
     
     return (
       <>
@@ -827,7 +828,7 @@ export default function App() {
         {isLandscape ? (
           <MobileLandscape 
             gameState={gameState}
-            user={user}
+            user={safeUser}
             isUserTurn={isUserTurn}
             handleAction={handleAction}
             handleCardClick={handleCardClick}
@@ -836,7 +837,7 @@ export default function App() {
         ) : (
           <MobilePortrait 
             gameState={gameState}
-            user={user}
+            user={safeUser}
             isUserTurn={isUserTurn}
             handleAction={handleAction}
             handleCardClick={handleCardClick}
