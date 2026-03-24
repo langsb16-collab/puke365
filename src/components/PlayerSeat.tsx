@@ -111,43 +111,49 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
             return (
               <div
                 key={`${player.id}-${i}`}
-                className="relative cursor-pointer"
+                className="relative w-16 h-24 sm:w-20 sm:h-28 cursor-pointer select-none"
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
               >
-                {/* 뒷면 카드 */}
-                <Card card={card} hidden={true} />
+                {/* 뒷면 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-600 to-orange-500 rounded-xl shadow-md flex items-center justify-center text-white text-3xl">
+                  👑
+                </div>
 
-                {/* 들린 카드 (2장 구조) */}
+                {/* 들린 앞면 */}
                 {!player.isAI && isPeek && (
-                  <div
-                    className="absolute bottom-0 left-0 w-full h-full"
+                  <motion.div
+                    initial={{ rotateX: 0 }}
+                    animate={{
+                      rotateX: isMobile ? 80 : 68,
+                      y: isMobile ? -10 : -8,
+                    }}
+                    transition={{ type: 'spring', stiffness: 180 }}
+                    className="absolute inset-0"
                     style={{
                       transformOrigin: 'bottom left',
-                      transform: isMobile
-                        ? 'perspective(1200px) rotateX(82deg) translateY(-10px)'
-                        : 'perspective(1000px) rotateX(70deg) translateY(-8px)',
+                      perspective: 1000,
                       zIndex: 10,
                     }}
                   >
                     <div
                       className="w-full h-full bg-white rounded-xl relative"
                       style={{
-                        boxShadow: '0px 40px 80px rgba(0,0,0,0.9)',
+                        boxShadow: '0px 35px 70px rgba(0,0,0,0.9)',
                       }}
                     >
-                      <div className="absolute top-3 left-3 leading-none">
-                        <div className={`text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className="absolute top-2 left-2 leading-none">
+                        <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                           {card?.rank}
                         </div>
-                        <div className={`text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
                           {SUIT_SYMBOL[card?.suit || 'spades']}
                         </div>
                       </div>
-                      <div className={`absolute inset-0 flex items-center justify-center text-4xl opacity-80 ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className={`absolute inset-0 flex items-center justify-center text-3xl opacity-80 ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {SUIT_SYMBOL[card?.suit || 'spades']}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
               </div>
             );
