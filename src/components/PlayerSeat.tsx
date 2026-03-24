@@ -76,7 +76,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         {/* Cards */}
         <div className="flex -space-x-4 mb-1">
           <AnimatePresence>
-            {!isFolded && player.cards && Array.isArray(player.cards) && player.cards.map((card, i) => {
+            {!isFolded && (player?.cards ?? []).map((card, i) => {
               // 🚨 핵심 로직: 카드 공개 조건
               // 1. showCards = true (쇼다운) → 모두 공개
               // 2. 본인(isAI === false) → 공개 가능

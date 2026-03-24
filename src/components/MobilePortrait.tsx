@@ -181,7 +181,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
           )}
 
           {/* ========== 다른 플레이어들 ========== */}
-          {gameState.players && Array.isArray(gameState.players) && gameState.players.map((p, i) => {
+          {(gameState?.players ?? []).map((p, i) => {
             if (p.id === 'user') return null;
             
             const shouldShowCards = gameState.stage === 'showdown' && !p.isFolded;
@@ -231,7 +231,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                   </div>
 
                   {/* 플레이어 카드 */}
-                  {p.cards && Array.isArray(p.cards) && p.cards.length > 0 && (
+                  {(p?.cards ?? []).length > 0 && (
                     <div className="flex gap-1 mt-1">
                       {(p.cards || []).map((card: any, cardIdx: number) => (
                         <div key={cardIdx}>
@@ -291,7 +291,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
 
       {/* ========== 내 카드 (하단 중앙, 크게) ========== */}
       <div className="flex justify-center gap-3 px-4 pb-3 z-40">
-        {user && user.cards && Array.isArray(user.cards) && user.cards.map((card: any, i: number) => {
+        {(user?.cards ?? []).map((card: any, i: number) => {
           const shouldShowCard = gameState.stage === 'showdown' || squeezedCards.has(i);
           
           return (
