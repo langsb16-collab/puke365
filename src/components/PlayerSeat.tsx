@@ -39,6 +39,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
   const { t } = useTranslation();
   const [peeked, setPeeked] = useState<Record<number, boolean>>({});
   
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const isFolded = player?.isFolded || false;
   
   if (!player) return null;
@@ -110,51 +111,45 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
             return (
               <div
                 key={`${player.id}-${i}`}
-                onClick={!player.isAI ? () => togglePeek(i) : undefined}
-                className="relative cursor-pointer select-none"
-                style={{
-                  perspective: '1200px',
-                  transformStyle: 'preserve-3d'
-                }}
+                className="relative"
               >
-                <motion.div
-                  animate={{
-                    rotateX: isPeek ? 65 : 0,
-                    scale: isPeek ? 1.2 : 1,
-                    y: isPeek ? -15 : 0
-                  }}
-                  transition={{ type: 'spring', stiffness: 180, damping: 18 }}
-                  style={{
-                    transformStyle: 'preserve-3d',
-                    transformOrigin: 'center bottom'
-                  }}
-                >
-                  {/* 뒷면 */}
-                  <div className="w-16 h-24 sm:w-20 sm:h-28 bg-gradient-to-br from-orange-600 to-orange-500 rounded-lg shadow-2xl border-2 border-orange-400 relative">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl">👑</div>
-                  </div>
+                {/* 뒷면 카드 */}
+                <Card card={card} hidden={true} />
 
-                  {/* 앞면 */}
-                  {!player.isAI && isPeek && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute inset-0 w-16 h-24 sm:w-20 sm:h-28 bg-white rounded-lg shadow-2xl border-2 border-gray-300"
-                      style={{
-                        clipPath: 'polygon(0 0, 55% 0, 55% 100%, 0 100%)'
-                      }}
-                    >
-                      <div className="absolute top-2 left-2 leading-none">
-                        <div className={`text-3xl sm:text-4xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                {/* PEEK */}
+                {!player.isAI && (
+                  <motion.div
+                    onClick={() => togglePeek(i)}
+                    animate={{
+                      y: isPeek ? -20 : 0,
+                      rotate: isPeek ? (isMobile ? -12 : -6) : 0,
+                    }}
+                    transition={{ type: 'spring', stiffness: 220 }}
+                    className="absolute top-0 left-0 w-full h-full pointer-events-auto cursor-pointer"
+                    style={{
+                      transformOrigin: 'bottom center',
+                      transform: isPeek
+                        ? isMobile
+                          ? 'perspective(900px) rotateX(55deg)'
+                          : 'perspective(900px) rotateX(25deg)'
+                        : 'none',
+                      clipPath: isPeek
+                        ? 'polygon(0 60%, 100% 40%, 100% 100%, 0% 100%)'
+                        : 'polygon(0 100%, 100% 100%, 100% 100%, 0% 100%)',
+                    }}
+                  >
+                    <div className="w-full h-full bg-white rounded-xl shadow-2xl relative">
+                      <div className="absolute top-3 left-3 leading-none">
+                        <div className={`text-xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                           {card?.rank}
                         </div>
-                        <div className={`text-2xl sm:text-3xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        <div className={`text-lg ${SUIT_COLOR[card?.suit || 'spades']}`}>
                           {SUIT_SYMBOL[card?.suit || 'spades']}
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </motion.div>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             );
           })}
