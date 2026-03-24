@@ -117,40 +117,37 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 {/* 뒷면 카드 */}
                 <Card card={card} hidden={true} />
 
-                {/* PEEK */}
-                {!player.isAI && (
-                  <motion.div
-                    animate={{
-                      y: isPeek ? (isMobile ? -8 : -14) : 0,
-                    }}
-                    transition={{ type: 'spring', stiffness: 220 }}
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                {/* 들린 카드 (2장 구조) */}
+                {!player.isAI && isPeek && (
+                  <div
+                    className="absolute bottom-0 left-0 w-full h-full"
                     style={{
                       transformOrigin: 'bottom left',
-                      transform: isPeek
-                        ? isMobile
-                          ? 'perspective(900px) rotateX(48deg) translateY(-8px)'
-                          : 'perspective(900px) rotateX(34deg)'
-                        : 'none',
-                      clipPath: isPeek
-                        ? 'polygon(0 78%, 100% 58%, 100% 100%, 0 100%)'
-                        : 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
-                      background: 'white',
-                      borderRadius: '12px',
-                      boxShadow: isPeek
-                        ? '0px 25px 50px rgba(0,0,0,0.8)'
-                        : 'none',
+                      transform: isMobile
+                        ? 'perspective(1200px) rotateX(82deg) translateY(-10px)'
+                        : 'perspective(1000px) rotateX(70deg) translateY(-8px)',
+                      zIndex: 10,
                     }}
                   >
-                    <div className="absolute bottom-2 left-2 leading-none">
-                      <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                        {card?.rank}
+                    <div
+                      className="w-full h-full bg-white rounded-xl relative"
+                      style={{
+                        boxShadow: '0px 40px 80px rgba(0,0,0,0.9)',
+                      }}
+                    >
+                      <div className="absolute top-3 left-3 leading-none">
+                        <div className={`text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          {card?.rank}
+                        </div>
+                        <div className={`text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          {SUIT_SYMBOL[card?.suit || 'spades']}
+                        </div>
                       </div>
-                      <div className={`text-base ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className={`absolute inset-0 flex items-center justify-center text-4xl opacity-80 ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {SUIT_SYMBOL[card?.suit || 'spades']}
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
               </div>
             );
