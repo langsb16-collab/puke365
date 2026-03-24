@@ -171,20 +171,43 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
             className="absolute inset-0 cursor-grab active:cursor-grabbing z-10"
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
           >
-            <div className="w-full h-full bg-gradient-to-br from-red-800 to-red-950 rounded-2xl border-4 border-white/30 shadow-2xl flex items-center justify-center overflow-hidden">
-              {/* 뒷면 패턴 */}
-              <div className="w-full h-full opacity-20 grid grid-cols-6 gap-2 p-4">
-                {Array.from({ length: 48 }).map((_, i) => (
-                  <div key={i} className="w-4 h-4 bg-white rounded-full" />
-                ))}
+            <div className="w-full h-full bg-gradient-to-br from-amber-900 via-amber-800 to-amber-950 rounded-2xl border-4 border-amber-600/50 shadow-2xl flex items-center justify-center overflow-hidden relative">
+              {/* 고급스러운 데미지 패턴 */}
+              <div className="absolute inset-0 opacity-40">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="damask-pattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+                      <circle cx="40" cy="40" r="15" fill="#d97706" opacity="0.3"/>
+                      <path d="M40 25 L45 35 L55 35 L47 42 L50 52 L40 45 L30 52 L33 42 L25 35 L35 35 Z" fill="#92400e" opacity="0.4"/>
+                      <circle cx="40" cy="40" r="8" fill="none" stroke="#78350f" strokeWidth="1" opacity="0.3"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#damask-pattern)"/>
+                </svg>
               </div>
               
-              {/* 중앙 로고 */}
+              {/* 중앙 문양 */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 border-4 border-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-white/30 font-black text-2xl italic tracking-tighter">CHUANQI</span>
+                <div className="relative">
+                  {/* 외곽 테두리 */}
+                  <div className="w-40 h-40 border-[3px] border-amber-400/40 rounded-full" />
+                  
+                  {/* 내부 장식 원 */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-[2px] border-amber-400/30 rounded-full" />
+                  
+                  {/* 중앙 심볼 */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1">
+                    <div className="text-amber-300/60 text-5xl">♔</div>
+                    <span className="text-amber-300/50 font-black text-lg italic tracking-widest">CHUANQI</span>
+                  </div>
                 </div>
               </div>
+              
+              {/* 코너 장식 */}
+              <div className="absolute top-4 left-4 text-amber-400/30 text-2xl">♠</div>
+              <div className="absolute top-4 right-4 text-amber-400/30 text-2xl">♥</div>
+              <div className="absolute bottom-4 left-4 text-amber-400/30 text-2xl">♦</div>
+              <div className="absolute bottom-4 right-4 text-amber-400/30 text-2xl">♣</div>
             </div>
           </motion.div>
         </div>

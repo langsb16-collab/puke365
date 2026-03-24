@@ -29,19 +29,38 @@ export const Card: React.FC<CardProps> = ({ card, hidden, className = '', style 
       <motion.div
         initial={{ rotateY: 180 }}
         animate={{ rotateY: 180 }}
-        className={`w-12 h-16 sm:w-16 sm:h-24 bg-gradient-to-br from-red-800 to-red-950 rounded-xl border-3 border-white/30 shadow-2xl flex items-center justify-center overflow-hidden ${className}`}
+        className={`w-12 h-16 sm:w-16 sm:h-24 bg-gradient-to-br from-amber-900 via-amber-800 to-amber-950 rounded-xl border-3 border-amber-600/50 shadow-2xl flex items-center justify-center overflow-hidden relative ${className}`}
         style={style}
       >
-        <div className="w-full h-full opacity-20 grid grid-cols-3 gap-1 p-1">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="w-2 h-2 bg-white rounded-full" />
-          ))}
+        {/* 고급스러운 데미지 패턴 */}
+        <div className="absolute inset-0 opacity-30">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="card-damask" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="20" cy="20" r="8" fill="#d97706" opacity="0.3"/>
+                <path d="M20 12 L23 18 L29 18 L24 22 L26 28 L20 24 L14 28 L16 22 L11 18 L17 18 Z" fill="#92400e" opacity="0.4"/>
+                <circle cx="20" cy="20" r="4" fill="none" stroke="#78350f" strokeWidth="0.5" opacity="0.3"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#card-damask)"/>
+          </svg>
         </div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-10 h-10 sm:w-14 sm:h-14 border-3 border-white/20 rounded-full flex items-center justify-center">
-            <span className="text-white/30 font-black text-[10px] sm:text-xs italic tracking-tighter">CHUANQI</span>
+        
+        {/* 중앙 장식 */}
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="flex flex-col items-center gap-1">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 border-2 border-amber-400/30 rounded-full flex items-center justify-center">
+              <span className="text-amber-300/50 text-lg sm:text-2xl">♔</span>
+            </div>
+            <span className="text-amber-300/40 font-black text-[8px] sm:text-[10px] italic tracking-wider">CHUANQI</span>
           </div>
         </div>
+        
+        {/* 코너 장식 */}
+        <div className="absolute top-1 left-1 text-amber-400/20 text-xs sm:text-sm">♠</div>
+        <div className="absolute top-1 right-1 text-amber-400/20 text-xs sm:text-sm">♥</div>
+        <div className="absolute bottom-1 left-1 text-amber-400/20 text-xs sm:text-sm">♦</div>
+        <div className="absolute bottom-1 right-1 text-amber-400/20 text-xs sm:text-sm">♣</div>
       </motion.div>
     );
   }

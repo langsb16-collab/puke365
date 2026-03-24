@@ -264,12 +264,23 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                           // 플레이 중: 카드 뒷면
                           <div 
                             className={`
-                              w-[32px] h-[44px] bg-gradient-to-br from-red-800 to-red-950 rounded-md shadow-lg 
-                              flex items-center justify-center border border-white/20
+                              w-[32px] h-[44px] bg-gradient-to-br from-amber-900 via-amber-800 to-amber-950 rounded-md shadow-lg 
+                              flex items-center justify-center border border-amber-600/50 relative overflow-hidden
                               ${cardIdx === 0 ? '-rotate-3' : 'rotate-3'}
                             `}
                           >
-                            <div className="text-white/10 text-[6px] font-black">🃏</div>
+                            {/* 미니 패턴 */}
+                            <div className="absolute inset-0 opacity-20">
+                              <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                  <pattern id="mini-damask" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+                                    <circle cx="8" cy="8" r="3" fill="#d97706" opacity="0.4"/>
+                                  </pattern>
+                                </defs>
+                                <rect width="100%" height="100%" fill="url(#mini-damask)"/>
+                              </svg>
+                            </div>
+                            <div className="text-amber-300/40 text-[10px] font-black">🃏</div>
                           </div>
                         )}
                       </div>
@@ -358,18 +369,41 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                 // 뒷면 카드
                 <div 
                   className={`
-                    w-[70px] h-[100px] bg-gradient-to-br from-red-800 to-red-950 rounded-xl shadow-2xl 
-                    flex items-center justify-center border-3 border-white/30
+                    w-[70px] h-[100px] bg-gradient-to-br from-amber-900 via-amber-800 to-amber-950 rounded-xl shadow-2xl 
+                    flex items-center justify-center border-3 border-amber-600/50 relative overflow-hidden
                     ${i === 0 ? 'rotate-3' : '-rotate-3'}
                   `}
                   style={{
                     filter: 'drop-shadow(0 15px 40px rgba(0,0,0,0.7))',
                   }}
                 >
-                  <div className="text-white/20 text-xs font-black">CHUANQI</div>
+                  {/* 고급스러운 데미지 패턴 */}
+                  <div className="absolute inset-0 opacity-30">
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern id="damask-small" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                          <circle cx="20" cy="20" r="8" fill="#d97706" opacity="0.3"/>
+                          <path d="M20 12 L23 18 L29 18 L24 22 L26 28 L20 24 L14 28 L16 22 L11 18 L17 18 Z" fill="#92400e" opacity="0.4"/>
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#damask-small)"/>
+                    </svg>
+                  </div>
+                  
+                  {/* 중앙 심볼 */}
+                  <div className="relative z-10 flex flex-col items-center gap-0.5">
+                    <div className="text-amber-300/50 text-xl">♔</div>
+                    <div className="text-amber-300/40 text-[8px] font-black italic">CHUANQI</div>
+                  </div>
+                  
+                  {/* 코너 장식 */}
+                  <div className="absolute top-1 left-1 text-amber-400/20 text-xs">♠</div>
+                  <div className="absolute top-1 right-1 text-amber-400/20 text-xs">♥</div>
+                  <div className="absolute bottom-1 left-1 text-amber-400/20 text-xs">♦</div>
+                  <div className="absolute bottom-1 right-1 text-amber-400/20 text-xs">♣</div>
                   
                   {/* TAP 인디케이터 */}
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-[9px] font-black px-2 py-0.5 rounded-full animate-bounce shadow-lg">
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-[9px] font-black px-2 py-0.5 rounded-full animate-bounce shadow-lg z-20">
                     TAP
                   </div>
                 </div>
