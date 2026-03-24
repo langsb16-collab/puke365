@@ -385,7 +385,7 @@ export default function App() {
       <div className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden">
         {/* Top Navigation Bar - Premium Casino Style */}
         {/* Fixed Language Selector - Always Visible on All Screens */}
-        <div className="fixed top-4 right-[280px] md:right-[300px] z-[100]">
+        <div className="fixed top-4 right-[16rem] md:right-[17rem] lg:right-[18rem] z-[100]">
           <div className="relative">
             <button 
               onClick={() => setIsLanguageOpen(!isLanguageOpen)}
@@ -828,10 +828,6 @@ export default function App() {
         <div className="flex items-center gap-2 md:gap-4">
           <button onClick={() => setShowStandings(!showStandings)} className="p-1.5 md:p-2 lg:p-2.5 bg-yellow-500/10 text-yellow-500 rounded-xl border border-yellow-500/20 hover:bg-yellow-500/20 transition-all">
             <Trophy size={14} className="md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />
-          </button>
-          <div className="h-6 md:h-8 w-px bg-white/10 hidden md:block" />
-          <button className="p-1.5 md:p-2 lg:p-2.5 bg-white/5 text-white/40 rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
-            <Settings size={14} className="md:w-4 md:h-4 lg:w-[18px] lg:h-[18px]" />
           </button>
         </div>
       </header>
