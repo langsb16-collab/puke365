@@ -111,7 +111,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
             return (
               <div
                 key={`${player.id}-${i}`}
-                className="relative w-16 h-24 sm:w-20 sm:h-28 cursor-pointer select-none"
+                className="relative w-16 h-24 sm:w-20 sm:h-28 cursor-pointer"
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
               >
                 {/* 뒷면 */}
@@ -119,42 +119,29 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                   👑
                 </div>
 
-                {/* 들린 앞면 */}
-                {!player.isAI && isPeek && (
-                  <motion.div
-                    initial={{ rotateX: 0 }}
-                    animate={{
-                      rotateX: isMobile ? 80 : 68,
-                      y: isMobile ? -10 : -8,
-                    }}
-                    transition={{ type: 'spring', stiffness: 180 }}
-                    className="absolute inset-0"
-                    style={{
-                      transformOrigin: 'bottom left',
-                      perspective: 1000,
-                      zIndex: 10,
-                    }}
-                  >
-                    <div
-                      className="w-full h-full bg-white rounded-xl relative"
-                      style={{
-                        boxShadow: '0px 35px 70px rgba(0,0,0,0.9)',
-                      }}
-                    >
-                      <div className="absolute top-2 left-2 leading-none">
-                        <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                          {card?.rank}
-                        </div>
-                        <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                          {SUIT_SYMBOL[card?.suit || 'spades']}
-                        </div>
-                      </div>
-                      <div className={`absolute inset-0 flex items-center justify-center text-3xl opacity-80 ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                        {SUIT_SYMBOL[card?.suit || 'spades']}
-                      </div>
+                {/* 앞면 슬라이드 */}
+                <motion.div
+                  animate={{
+                    x: isPeek ? -28 : 0,
+                    y: isPeek ? -6 : 0,
+                    rotate: isPeek ? -2 : 0,
+                  }}
+                  transition={{ type: 'spring', stiffness: 250 }}
+                  className="absolute inset-0 bg-white rounded-xl shadow-xl"
+                  style={{
+                    clipPath: 'inset(0 0 0 50%)',
+                    zIndex: 10,
+                  }}
+                >
+                  <div className="absolute top-2 left-2 leading-none">
+                    <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      {card?.rank}
                     </div>
-                  </motion.div>
-                )}
+                    <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      {SUIT_SYMBOL[card?.suit || 'spades']}
+                    </div>
+                  </div>
+                </motion.div>
               </div>
             );
           })}
