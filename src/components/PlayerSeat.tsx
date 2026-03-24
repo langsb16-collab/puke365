@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Player } from '../types';
 import { Card } from './Card';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Bot, Trophy } from 'lucide-react';
+import { User, Bot } from 'lucide-react';
 import { useTranslation } from '../LanguageContext';
 
 interface PlayerSeatProps {
@@ -11,8 +11,6 @@ interface PlayerSeatProps {
   isDealer: boolean;
   showCards: boolean;
   position: string;
-  onCardClick?: (index: number) => void;
-  hasSqueezed?: Set<number>;
 }
 
 export const PlayerSeat: React.FC<PlayerSeatProps> = ({ 
@@ -20,15 +18,26 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
   isActive, 
   isDealer, 
   showCards,
-  position,
-  onCardClick,
-  hasSqueezed = new Set()
+  position
 }) => {
   const { t } = useTranslation();
+  const [squeezed, setSqueezed] = useState(false);
   
   const isFolded = player?.isFolded || false;
   
   if (!player) return null;
+
+  const handleSqueeze = () => {
+    setSqueezed(prev => !prev);
+
+    // 사운드
+    const audio = new Audio("/sounds/flip.mp3");
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+
+    // 햅틱
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
   
   return (
     <div className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${position}`}>
@@ -78,37 +87,45 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
 
         {/* Cards */}
         <div className="flex -space-x-4 mb-1">
-          <AnimatePresence>
-            {!isFolded && (player?.cards ?? []).map((card, i) => {
-              // 🚨 핵심 로직: 카드 공개 조건
-              // 1. showCards = true (쇼다운) → 모두 공개
-              // 2. 본인(isAI === false) → 공개 가능
-              // 3. AI 플레이어 → 항상 숨김 (쇼다운 제외)
-              const shouldShowCard = showCards || (!player.isAI && hasSqueezed.has(i));
-              
-              return (
-                <div 
-                  key={`${player.id}-card-${i}`}
-                  onClick={() => !player.isAI && !showCards ? onCardClick?.(i) : undefined}
-                  className={!player.isAI && !showCards ? 'cursor-pointer relative' : 'relative'}
+          {(player?.cards ?? []).map((card, i) => (
+            <motion.div
+              key={`${player.id}-card-${i}`}
+              onClick={!player.isAI ? handleSqueeze : undefined}
+              className={!player.isAI ? "cursor-pointer relative" : "relative"}
+              animate={{
+                rotate: squeezed ? (i === 0 ? -8 : 8) : 0,
+                y: squeezed ? -14 : 0,
+                scale: squeezed ? 1.05 : 1,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 18 }}
+            >
+              <Card
+                card={card}
+                hidden={!showCards && player.isAI}
+              />
+
+              {/* 코너 숫자 표시 */}
+              {!player.isAI && (
+                <motion.div
+                  animate={{
+                    x: squeezed ? -8 : 0,
+                    y: squeezed ? 8 : 0,
+                    rotate: squeezed ? -15 : 0,
+                    opacity: squeezed ? 1 : 0,
+                  }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  className="absolute top-0 right-0 w-10 h-10 bg-white rounded-bl-xl flex items-center justify-center shadow-lg pointer-events-none"
+                  style={{
+                    clipPath: "polygon(0 0, 100% 0, 100% 100%)",
+                  }}
                 >
-                  <Card 
-                    card={card} 
-                    hidden={!shouldShowCard}
-                    className={`
-                      ${player.isAI ? (i === 1 ? 'rotate-3' : '-rotate-3') : (i === 0 ? 'rotate-3' : '-rotate-3')}
-                      ${!player.isAI && !showCards ? 'hover:scale-110 hover:-translate-y-2 transition-transform' : ''}
-                    `}
-                  />
-                  {!player.isAI && !showCards && (
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[8px] font-black px-1 rounded animate-bounce z-30">
-                      {hasSqueezed.has(i) ? '👁️' : 'TAP'}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </AnimatePresence>
+                  <span className="text-xs font-bold text-black">
+                    {card?.rank}
+                  </span>
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
         </div>
 
         {/* Player Info Card */}
