@@ -385,15 +385,15 @@ export default function App() {
       <div className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden">
         {/* Top Navigation Bar - Premium Casino Style */}
         {/* Fixed Language Selector - Always Visible on All Screens */}
-        <div className="fixed top-4 right-[16rem] md:right-[17rem] lg:right-[18rem] z-[100]">
+        <div className="fixed top-24 right-4 md:top-4 md:right-[17rem] lg:right-[18rem] z-[100]">
           <div className="relative">
             <button 
               onClick={() => setIsLanguageOpen(!isLanguageOpen)}
-              className="flex items-center gap-2 px-3 py-2 bg-black/60 backdrop-blur-xl border border-yellow-500/30 rounded-xl hover:bg-black/80 hover:border-yellow-500/50 transition-all shadow-lg shadow-yellow-500/20"
+              className="flex items-center gap-2 px-2 py-1.5 md:px-3 md:py-2 bg-black/60 backdrop-blur-xl border border-yellow-500/30 rounded-xl hover:bg-black/80 hover:border-yellow-500/50 transition-all shadow-lg shadow-yellow-500/20"
             >
-              <Globe size={16} className="text-yellow-500" />
-              <span className="text-xs font-bold uppercase text-white">{language}</span>
-              <ChevronDown size={14} className={`text-yellow-500 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
+              <Globe size={14} className="text-yellow-500 md:w-4 md:h-4" />
+              <span className="text-[10px] md:text-xs font-bold uppercase text-white">{language}</span>
+              <ChevronDown size={12} className={`text-yellow-500 md:w-3.5 md:h-3.5 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
             </button>
             
             <AnimatePresence>
