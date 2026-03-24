@@ -303,7 +303,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
               onClick={() => togglePeek(i)}
               className="cursor-pointer relative"
               style={{
-                transform: isPeek ? (i === 0 ? 'rotate(-6deg) translateY(-8px) scale(1.04)' : 'rotate(6deg) translateY(-8px) scale(1.04)') : 'none',
+                transform: isPeek ? 'translateY(-8px) scale(1.03)' : 'none',
                 transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
               }}
             >
@@ -328,28 +328,29 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                 </div>
               </div>
 
-              {/* 40% 코너 평면 들기 */}
+              {/* 절반 카드 슬라이드 오픈 */}
               <div
-                className="absolute top-0 right-0 w-[40%] h-[40%] pointer-events-none"
+                className="absolute top-0 right-0 w-[50%] h-full overflow-hidden pointer-events-none"
                 style={{
-                  clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
-                  transformOrigin: 'top right',
-                  transform: isPeek
-                    ? 'rotateZ(-8deg) translate(-6px, 6px) skewY(-4deg) translate(-10px, 10px) rotate(-10deg)'
-                    : 'none',
-                  background: 'white',
-                  borderBottomLeftRadius: '12px',
-                  boxShadow: isPeek ? '0px 10px 20px rgba(0,0,0,0.5)' : 'none',
+                  borderTopRightRadius: '16px',
+                  borderBottomRightRadius: '16px',
+                  transform: isPeek ? 'translate(-28px, 8px)' : 'none',
                   opacity: isPeek ? 1 : 0,
                   transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 }}
               >
-                <div className="absolute top-1 right-1 text-right leading-none">
-                  <div className={`text-base font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                    {card?.rank}
-                  </div>
-                  <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                    {SUIT_SYMBOL[card?.suit || 'spades']}
+                {/* 진짜 카드 절반 */}
+                <div className="w-[200%] h-full flex justify-end">
+                  <div className="w-1/2 h-full bg-white rounded-2xl shadow-lg relative">
+                    {/* 숫자 */}
+                    <div className="absolute top-2 right-2 text-right leading-none">
+                      <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        {card?.rank}
+                      </div>
+                      <div className={`text-base ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        {SUIT_SYMBOL[card?.suit || 'spades']}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

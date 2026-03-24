@@ -113,50 +113,45 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
                 className="relative cursor-pointer select-none"
                 animate={{
-                  rotate: isPeek ? (i === 0 ? -6 : 6) : 0,
                   y: isPeek ? -8 : 0,
-                  scale: isPeek ? 1.04 : 1,
+                  scale: isPeek ? 1.03 : 1,
                 }}
                 transition={{
                   type: "spring",
-                  stiffness: 320,
+                  stiffness: 280,
                   damping: 20,
                 }}
               >
                 {/* 항상 뒷면 */}
                 <Card card={card} hidden={true} />
 
-                {/* 40% 코너 평면 들기 */}
+                {/* 절반 카드 슬라이드 오픈 */}
                 {!player.isAI && (
                   <motion.div
                     animate={{
-                      x: isPeek ? -10 : 0,
-                      y: isPeek ? 10 : 0,
-                      rotate: isPeek ? -10 : 0,
+                      x: isPeek ? -28 : 0,
+                      y: isPeek ? 8 : 0,
                       opacity: isPeek ? 1 : 0,
                     }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="absolute top-0 right-0 w-[40%] h-[40%] pointer-events-none"
+                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                    className="absolute top-0 right-0 w-[50%] h-full overflow-hidden pointer-events-none"
                     style={{
-                      clipPath: "polygon(0 0, 100% 0, 100% 100%)",
-                      transformOrigin: "top right",
-                      transform: isPeek
-                        ? "rotateZ(-8deg) translate(-6px, 6px) skewY(-4deg)"
-                        : "none",
-                      background: "white",
-                      borderBottomLeftRadius: "12px",
-                      boxShadow: isPeek
-                        ? "0px 10px 20px rgba(0,0,0,0.5)"
-                        : "none",
+                      borderTopRightRadius: "12px",
+                      borderBottomRightRadius: "12px",
                     }}
                   >
-                    {/* 숫자 + 무늬 (절대 왜곡 없음) */}
-                    <div className="absolute top-1 right-1 text-right leading-none">
-                      <div className={`text-base font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                        {card?.rank}
-                      </div>
-                      <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                        {SUIT_SYMBOL[card?.suit || 'spades']}
+                    {/* 진짜 카드 절반 */}
+                    <div className="w-[200%] h-full flex justify-end">
+                      <div className="w-1/2 h-full bg-white rounded-xl shadow-lg relative">
+                        {/* 숫자 */}
+                        <div className="absolute top-2 right-2 text-right leading-none">
+                          <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                            {card?.rank}
+                          </div>
+                          <div className={`text-base ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                            {SUIT_SYMBOL[card?.suit || 'spades']}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
