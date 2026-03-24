@@ -76,27 +76,35 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         {/* Cards */}
         <div className="flex -space-x-4 mb-1">
           <AnimatePresence>
-            {!isFolded && player.cards.map((card, i) => (
-              <div 
-                key={`${player.id}-card-${i}`}
-                onClick={() => !player.isAI && onCardClick?.(i)}
-                className={!player.isAI && !showCards && !hasSqueezed.has(i) ? 'cursor-pointer' : ''}
-              >
-                <Card 
-                  card={card} 
-                  hidden={!showCards && !player.isAI && !hasSqueezed.has(i)} 
-                  className={`
-                    ${i === 1 ? 'rotate-3' : '-rotate-3'}
-                    ${!player.isAI && !showCards && !hasSqueezed.has(i) ? 'hover:scale-110 hover:-translate-y-2 transition-transform' : ''}
-                  `}
-                />
-                {!player.isAI && !showCards && !hasSqueezed.has(i) && (
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[8px] font-black px-1 rounded animate-bounce z-30">
-                    TAP
-                  </div>
-                )}
-              </div>
-            ))}
+            {!isFolded && player.cards.map((card, i) => {
+              // 🚨 핵심 로직: 카드 공개 조건
+              // 1. showCards = true (쇼다운) → 모두 공개
+              // 2. 본인(isAI === false) → 공개 가능
+              // 3. AI 플레이어 → 항상 숨김 (쇼다운 제외)
+              const shouldShowCard = showCards || (!player.isAI && hasSqueezed.has(i));
+              
+              return (
+                <div 
+                  key={`${player.id}-card-${i}`}
+                  onClick={() => !player.isAI && !showCards && !hasSqueezed.has(i) ? onCardClick?.(i) : undefined}
+                  className={!player.isAI && !showCards && !hasSqueezed.has(i) ? 'cursor-pointer' : ''}
+                >
+                  <Card 
+                    card={card} 
+                    hidden={!shouldShowCard}
+                    className={`
+                      ${i === 1 ? 'rotate-3' : '-rotate-3'}
+                      ${!player.isAI && !showCards && !hasSqueezed.has(i) ? 'hover:scale-110 hover:-translate-y-2 transition-transform' : ''}
+                    `}
+                  />
+                  {!player.isAI && !showCards && !hasSqueezed.has(i) && (
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[8px] font-black px-1 rounded animate-bounce z-30">
+                      TAP
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </AnimatePresence>
         </div>
 
