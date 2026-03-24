@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { GameState } from '../types';
 import { useTranslation } from '../LanguageContext';
-// motion import removed
 
 interface MobilePortraitProps {
   gameState: GameState;
@@ -31,6 +30,15 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
   squeezedCards = new Set()
 }) => {
   const { t } = useTranslation();
+  const [squeezed, setSqueezed] = useState(false);
+
+  const handleSqueeze = () => {
+    setSqueezed(prev => !prev);
+    const audio = new Audio("/sounds/flip.mp3");
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
 
   const SUIT_SYMBOLS: Record<string, string> = {
     hearts: '♥',
@@ -285,66 +293,63 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
 
       {/* ========== 내 카드 (하단 중앙, 크게) ========== */}
       <div className="flex justify-center gap-3 px-4 pb-3 z-40">
-        {(user?.cards ?? []).map((card: any, i: number) => {
-          const shouldShowCard = gameState.stage === 'showdown' || squeezedCards.has(i);
-          
-          return (
-            <div
-              key={i}
-              onClick={() => {
-                handleCardClick?.(i);
-                if (navigator.vibrate) navigator.vibrate(15);
-              }}
-              className="cursor-pointer relative"
+        {(user?.cards ?? []).map((card: any, i: number) => (
+          <div
+            key={i}
+            onClick={handleSqueeze}
+            className="cursor-pointer relative"
+            style={{
+              transform: squeezed ? (i === 0 ? 'rotate(-10deg) translateY(-16px) scale(1.06)' : 'rotate(10deg) translateY(-16px) scale(1.06)') : 'none',
+              transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}
+          >
+            {/* 항상 뒷면 카드 */}
+            <div 
+              className="w-16 h-[88px] bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 rounded-2xl shadow-2xl flex items-center justify-center border-3 border-orange-400/50 relative overflow-hidden"
             >
-              {shouldShowCard ? (
-                // 오픈된 카드 (Hello Pokers 스타일)
-                <div 
-                  className="w-16 h-[88px] bg-white rounded-2xl shadow-2xl flex flex-col items-center justify-center border-2 border-gray-100 relative overflow-hidden"
-                  style={{
-                    boxShadow: '0 15px 50px rgba(0,0,0,0.7), 0 0 30px rgba(255,255,255,0.2)',
-                  }}
-                >
-                  <span className={`text-4xl font-black ${SUIT_COLORS[card.suit]}`}>
-                    {card.rank}
-                  </span>
-                  <span className={`text-3xl ${SUIT_COLORS[card.suit]}`}>
-                    {SUIT_SYMBOLS[card.suit]}
-                  </span>
-
-                </div>
-              ) : (
-                // 뒷면 카드 (Hello Pokers 오렌지 스타일)
-                <div 
-                  className="w-16 h-[88px] bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 rounded-2xl shadow-2xl flex items-center justify-center border-3 border-orange-400/50 relative overflow-hidden"
-                >
-                  {/* 패턴 */}
-                  <div className="absolute inset-0 opacity-30">
-                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                      <defs>
-                        <pattern id="card-pattern" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-                          <circle cx="15" cy="15" r="5" fill="#fbbf24" opacity="0.4"/>
-                        </pattern>
-                      </defs>
-                      <rect width="100%" height="100%" fill="url(#card-pattern)"/>
-                    </svg>
-                  </div>
-                  
-                  {/* 중앙 심볼 */}
-                  <div className="relative z-10 flex flex-col items-center gap-1">
-                    <div className="text-yellow-200/60 text-3xl">👑</div>
-                    <div className="text-yellow-200/50 text-[10px] font-black italic tracking-wider">CHUANQI</div>
-                  </div>
-                  
-                  {/* TAP 인디케이터 */}
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-[9px] font-black px-2.5 py-0.5 rounded-full animate-bounce shadow-xl z-30">
-                    TAP
-                  </div>
-                </div>
-              )}
+              {/* 패턴 */}
+              <div className="absolute inset-0 opacity-30">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id={`card-pattern-${i}`} x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+                      <circle cx="15" cy="15" r="5" fill="#fbbf24" opacity="0.4"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill={`url(#card-pattern-${i})`}/>
+                </svg>
+              </div>
+              
+              {/* 중앙 심볼 */}
+              <div className="relative z-10 flex flex-col items-center gap-1">
+                <div className="text-yellow-200/60 text-3xl">👑</div>
+                <div className="text-yellow-200/50 text-[10px] font-black italic tracking-wider">CHUANQI</div>
+              </div>
             </div>
-          );
-        })}
+
+            {/* 코너 1/3 휘어짐 + 숫자 노출 */}
+            <div
+              className="absolute top-0 right-0 w-[34%] h-[34%] pointer-events-none flex items-start justify-end"
+              style={{
+                clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
+                transformOrigin: 'top right',
+                transform: squeezed
+                  ? 'perspective(600px) rotateX(25deg) skewY(-8deg) translate(-12px, 12px) rotate(-20deg)'
+                  : 'perspective(600px) rotateX(0deg) skewY(0deg)',
+                background: 'white',
+                borderBottomLeftRadius: '12px',
+                boxShadow: squeezed ? '0px 12px 25px rgba(0,0,0,0.5)' : 'none',
+                opacity: squeezed ? 1 : 0,
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              }}
+            >
+              <div className="flex justify-end p-1">
+                <span className="text-sm font-bold text-black">
+                  {card?.rank}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* ========== 액션 버튼 (4열 그리드, Hello Pokers 스타일) ========== */}
