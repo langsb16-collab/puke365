@@ -385,7 +385,7 @@ export default function App() {
       <div className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden">
         {/* Top Navigation Bar - Premium Casino Style */}
         {/* Fixed Language Selector - Always Visible on All Screens */}
-        <div className="fixed top-4 right-4 z-[100]">
+        <div className="fixed top-4 right-[280px] md:right-[300px] z-[100]">
           <div className="relative">
             <button 
               onClick={() => setIsLanguageOpen(!isLanguageOpen)}
