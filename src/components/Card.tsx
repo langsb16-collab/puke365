@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card as CardType } from '../types';
-import { motion } from 'motion/react';
 
 interface CardProps {
   card?: CardType;
@@ -26,9 +25,7 @@ const SUIT_COLORS: Record<string, string> = {
 export const Card: React.FC<CardProps> = ({ card, hidden, className = '', style }) => {
   if (hidden || !card) {
     return (
-      <motion.div
-        initial={{ rotateY: 180 }}
-        animate={{ rotateY: 180 }}
+      <div
         className={`w-12 h-16 sm:w-16 sm:h-24 bg-gradient-to-br from-amber-900 via-amber-800 to-amber-950 rounded-xl border-3 border-amber-600/50 shadow-2xl flex items-center justify-center overflow-hidden relative ${className}`}
         style={style}
       >
@@ -61,14 +58,12 @@ export const Card: React.FC<CardProps> = ({ card, hidden, className = '', style 
         <div className="absolute top-1 right-1 text-amber-400/20 text-xs sm:text-sm">♥</div>
         <div className="absolute bottom-1 left-1 text-amber-400/20 text-xs sm:text-sm">♦</div>
         <div className="absolute bottom-1 right-1 text-amber-400/20 text-xs sm:text-sm">♣</div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ scale: 0.8, opacity: 0, y: 20 }}
-      animate={{ scale: 1, opacity: 1, y: 0 }}
+    <div
       className={`w-12 h-16 sm:w-16 sm:h-24 bg-white rounded-xl border-2 border-gray-100 shadow-2xl flex flex-col p-1.5 sm:p-2.5 relative overflow-hidden ${className}`}
       style={style}
     >
@@ -90,13 +85,6 @@ export const Card: React.FC<CardProps> = ({ card, hidden, className = '', style 
       <div className={`absolute bottom-1.5 right-1.5 sm:bottom-2.5 sm:right-2.5 text-sm sm:text-2xl font-black ${SUIT_COLORS[card.suit]} rotate-180`}>
         {card.rank}
       </div>
-
-      {/* 빛나는 효과 */}
-      <motion.div 
-        animate={{ x: [-100, 200] }}
-        transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: "linear" }}
-        className="absolute inset-0 w-8 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 pointer-events-none"
-      />
-    </motion.div>
+    </div>
   );
 };
