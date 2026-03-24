@@ -125,18 +125,26 @@ export default function App() {
     const bbIndex = (dealerIndex + 2) % state.players.length;
     const firstPlayerIndex = (dealerIndex + 3) % state.players.length;
 
-    const players = state.players.map((p, i) => ({
-      ...p,
-      cards: [deck.pop()!, deck.pop()!],
-      isDealer: i === dealerIndex,
-      isSmallBlind: i === sbIndex,
-      isBigBlind: i === bbIndex,
-      currentBet: i === sbIndex ? state.smallBlind : i === bbIndex ? state.bigBlind : 0,
-      isFolded: p.chips <= 0,
-      isAllIn: false,
-      lastAction: undefined,
-      winRate: undefined,
-    }));
+    const players = state.players.map((p, i) => {
+      const card1 = deck.pop();
+      const card2 = deck.pop();
+      if (!card1 || !card2) {
+        console.error('Deck empty during card dealing');
+        return { ...p, cards: [] };
+      }
+      return {
+        ...p,
+        cards: [card1, card2],
+        isDealer: i === dealerIndex,
+        isSmallBlind: i === sbIndex,
+        isBigBlind: i === bbIndex,
+        currentBet: i === sbIndex ? state.smallBlind : i === bbIndex ? state.bigBlind : 0,
+        isFolded: p.chips <= 0,
+        isAllIn: false,
+        lastAction: undefined,
+        winRate: undefined,
+      };
+    });
 
     // Deduct blinds
     players[sbIndex].chips -= state.smallBlind;
