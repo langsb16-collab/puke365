@@ -325,29 +325,28 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                 </div>
               </div>
 
-              {/* 앞면 슬라이드 */}
-              <motion.div
-                initial={false}
-                animate={{
-                  x: isPeek ? -100 : 0,
-                  y: isPeek ? -4 : 0,
-                }}
-                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                className="absolute inset-0 bg-white rounded-2xl shadow-2xl pointer-events-none"
-                style={{ zIndex: isPeek ? 20 : 5 }}
-              >
-                <div className="absolute top-2 left-2 leading-none">
-                  <div className={`text-lg font-black ${SUIT_COLOR[card.suit]}`}>
-                    {card.rank}
+              {/* 앞면은 클릭 시에만 생성 */}
+              {isPeek && (
+                <motion.div
+                  initial={false}
+                  animate={{ x: -100, y: -4 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                  className="absolute inset-0 bg-white rounded-2xl shadow-2xl pointer-events-none"
+                  style={{ zIndex: 20 }}
+                >
+                  <div className="absolute top-2 left-2 leading-none">
+                    <div className={`text-lg font-black ${SUIT_COLOR[card.suit]}`}>
+                      {card.rank}
+                    </div>
+                    <div className={`text-sm ${SUIT_COLOR[card.suit]}`}>
+                      {SUIT_SYMBOL[card.suit]}
+                    </div>
                   </div>
-                  <div className={`text-sm ${SUIT_COLOR[card.suit]}`}>
+                  <div className={`absolute inset-0 flex items-center justify-center text-2xl opacity-80 ${SUIT_COLOR[card.suit]}`}>
                     {SUIT_SYMBOL[card.suit]}
                   </div>
-                </div>
-                <div className={`absolute inset-0 flex items-center justify-center text-2xl opacity-80 ${SUIT_COLOR[card.suit]}`}>
-                  {SUIT_SYMBOL[card.suit]}
-                </div>
-              </motion.div>
+                </motion.div>
+              )}
             </div>
           );
         })}

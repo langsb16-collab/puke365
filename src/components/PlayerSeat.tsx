@@ -111,32 +111,34 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
             return (
               <div
                 key={`${player.id}-${i}`}
-                className="relative cursor-pointer"
+                className="relative cursor-pointer w-16 h-24"
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
               >
+                {/* 항상 뒷면 카드 */}
                 <Card card={card} hidden={true} />
 
-                <motion.div
-                  initial={false}
-                  animate={{
-                    x: isPeek ? -110 : 0,
-                  }}
-                  transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                  className="absolute inset-0 bg-white rounded-xl shadow-2xl"
-                  style={{ zIndex: 10 }}
-                >
-                  <div className="absolute top-2 left-2 leading-none">
-                    <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                      {card?.rank}
+                {/* 앞면은 클릭 시에만 생성 */}
+                {isPeek && (
+                  <motion.div
+                    initial={false}
+                    animate={{ x: -110, y: -4 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                    className="absolute inset-0 bg-white rounded-xl shadow-2xl pointer-events-none"
+                    style={{ zIndex: 20 }}
+                  >
+                    <div className="absolute top-2 left-2 leading-none">
+                      <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        {card?.rank}
+                      </div>
+                      <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        {SUIT_SYMBOL[card?.suit || 'spades']}
+                      </div>
                     </div>
-                    <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                    <div className={`absolute inset-0 flex items-center justify-center text-3xl opacity-80 ${SUIT_COLOR[card?.suit || 'spades']}`}>
                       {SUIT_SYMBOL[card?.suit || 'spades']}
                     </div>
-                  </div>
-                  <div className={`absolute inset-0 flex items-center justify-center text-3xl opacity-80 ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                    {SUIT_SYMBOL[card?.suit || 'spades']}
-                  </div>
-                </motion.div>
+                  </motion.div>
+                )}
               </div>
             );
           })}
