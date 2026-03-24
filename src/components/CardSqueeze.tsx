@@ -30,14 +30,15 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
   const y = useMotionValue(0);
   const audio = AudioManager.getInstance();
 
-  // Map drag position to rotation and reveal
-  const rotateZ = useTransform(x, [0, 100], [0, 25]);
-  const rotateX = useTransform(y, [0, -100], [0, -20]);
-  const revealWidth = useTransform(x, [0, 150], ["0%", "100%"]);
-  const revealHeight = useTransform(y, [0, -150], ["0%", "100%"]);
+  // Map drag position to rotation and reveal - 40% reveal threshold
+  const rotateZ = useTransform(x, [0, 100], [0, 35]);
+  const rotateX = useTransform(y, [0, -100], [0, -25]);
+  const rotateY = useTransform(x, [0, 100], [0, 15]); // Add Y-axis rotation for 3D effect
+  const revealWidth = useTransform(x, [0, 100], ["0%", "40%"]); // 40% reveal on horizontal drag
+  const revealHeight = useTransform(y, [0, -100], ["0%", "40%"]); // 40% reveal on vertical drag
   
   // Opacity of the back card as we squeeze
-  const backOpacity = useTransform(x, [0, 100], [1, 0.3]);
+  const backOpacity = useTransform(x, [0, 100], [1, 0.6]); // Keep more opacity for realistic effect
 
   // Finger position follow
   const fingerX = useMotionValue(0);
@@ -61,11 +62,13 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    if (x.get() > 100 || y.get() < -100) {
+    // Reveal only when dragged enough (40% threshold)
+    if (x.get() > 80 || y.get() < -80) {
       setIsRevealed(true);
       audio.playSynthesized('win');
       if (onComplete) onComplete();
     } else {
+      // Spring back animation
       x.set(0);
       y.set(0);
       audio.playSynthesized('card');
@@ -73,20 +76,20 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
   };
 
   return (
-    <div className={`relative w-48 h-72 perspective-1000 ${className}`}>
+    <div className={`relative w-48 h-72 ${className}`} style={{ perspective: '1500px' }}>
       {/* Finger Overlay */}
       <AnimatePresence>
         {isDragging && (
           <motion.div
             style={{ x: fingerX, y: fingerY }}
             initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 0.8, scale: 1 }}
+            animate={{ opacity: 0.7, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            className="fixed z-[300] w-16 h-16 -ml-8 -mt-8 pointer-events-none"
+            className="fixed z-[300] w-20 h-20 -ml-10 -mt-10 pointer-events-none"
           >
-            <div className="w-full h-full bg-gradient-to-br from-orange-200 to-orange-400 rounded-full shadow-2xl border-2 border-white/20 opacity-60 blur-[2px]" />
+            <div className="w-full h-full bg-gradient-to-br from-orange-300 to-orange-500 rounded-full shadow-2xl border-4 border-white/30 opacity-70 blur-[1px]" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-10 h-10 bg-white/20 rounded-full animate-ping" />
+              <div className="w-12 h-12 bg-white/30 rounded-full animate-ping" />
             </div>
           </motion.div>
         )}
@@ -96,12 +99,14 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
         {!isRevealed && (
           <motion.div
             drag
-            dragConstraints={{ left: 0, right: 150, top: -150, bottom: 0 }}
-            style={{ x, y, rotateZ, rotateX }}
+            dragConstraints={{ left: 0, right: 100, top: -100, bottom: 0 }}
+            dragElastic={0.1}
+            style={{ x, y, rotateZ, rotateX, rotateY }}
             onDragStart={handleDragStart}
             onDrag={handleDrag}
             onDragEnd={handleDragEnd}
             className="absolute inset-0 z-20 cursor-grab active:cursor-grabbing"
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
           >
             {/* Card Back */}
             <motion.div 
@@ -120,27 +125,27 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
               </div>
             </motion.div>
 
-            {/* Partial Reveal Mask (The "Squeeze" effect) */}
+            {/* Partial Reveal Mask (The "Squeeze" effect - 40% reveal) */}
             <motion.div 
               style={{ width: revealWidth, height: revealHeight }}
-              className="absolute top-0 left-0 overflow-hidden rounded-2xl border-4 border-white/50 bg-white shadow-2xl pointer-events-none"
+              className="absolute top-0 left-0 overflow-hidden rounded-2xl border-4 border-yellow-400/70 bg-white shadow-[0_10px_50px_rgba(0,0,0,0.5)] pointer-events-none"
             >
-              <div className="w-48 h-72 p-4 flex flex-col relative">
-                <div className={`text-5xl font-black leading-none ${SUIT_COLORS[card.suit]}`}>
+              <div className="w-48 h-72 p-4 flex flex-col relative bg-gradient-to-br from-white to-gray-50">
+                <div className={`text-5xl font-black leading-none ${SUIT_COLORS[card.suit]} drop-shadow-lg`}>
                   {card.rank}
                 </div>
-                <div className={`text-4xl leading-none mt-2 ${SUIT_COLORS[card.suit]}`}>
+                <div className={`text-4xl leading-none mt-2 ${SUIT_COLORS[card.suit]} drop-shadow-lg`}>
                   {SUIT_SYMBOLS[card.suit]}
                 </div>
                 <div className={`absolute bottom-4 right-4 text-9xl opacity-10 ${SUIT_COLORS[card.suit]}`}>
                   {SUIT_SYMBOLS[card.suit]}
                 </div>
                 
-                {/* Shine Effect */}
+                {/* Enhanced Shine Effect */}
                 <motion.div 
-                  animate={{ x: [-100, 300] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 w-20 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 pointer-events-none"
+                  animate={{ x: [-150, 350] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute inset-0 w-24 h-full bg-gradient-to-r from-transparent via-yellow-300/50 to-transparent skew-x-12 pointer-events-none blur-[1px]"
                 />
               </div>
             </motion.div>
@@ -176,9 +181,9 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
       )}
 
       {/* Instruction Text */}
-      {!isRevealed && (
-        <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-bounce">
-          Drag to Squeeze
+      {!isRevealed && !isDragging && (
+        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap text-yellow-400 text-xs font-black uppercase tracking-[0.3em] animate-pulse">
+          👆 드래그하여 카드 쪼이기
         </div>
       )}
     </div>
