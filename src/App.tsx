@@ -424,15 +424,15 @@ export default function App() {
               <button className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center text-black hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20">+</button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <div className="relative">
                 <button 
                   onClick={() => setIsLanguageOpen(!isLanguageOpen)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all"
+                  className="flex items-center gap-1 md:gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-white/5 border border-white/10 rounded-lg md:rounded-xl hover:bg-white/10 transition-all"
                 >
-                  <Globe size={16} className="text-yellow-500" />
-                  <span className="text-xs font-bold uppercase">{language}</span>
-                  <ChevronDown size={14} className={`transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
+                  <Globe size={14} className="text-yellow-500 md:w-4 md:h-4" />
+                  <span className="text-[10px] md:text-xs font-bold uppercase">{language}</span>
+                  <ChevronDown size={12} className={`md:w-3.5 md:h-3.5 transition-transform ${isLanguageOpen ? 'rotate-180' : ''}`} />
                 </button>
                 
                 <AnimatePresence>
@@ -441,7 +441,7 @@ export default function App() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-32 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+                      className="absolute right-0 mt-2 w-28 md:w-32 bg-neutral-900 border border-white/10 rounded-lg md:rounded-xl shadow-2xl overflow-hidden z-50"
                     >
                       {(['en', 'ko', 'zh'] as const).map((lang) => (
                         <button
@@ -450,7 +450,7 @@ export default function App() {
                             setLanguage(lang);
                             setIsLanguageOpen(false);
                           }}
-                          className={`w-full px-4 py-3 text-left text-xs font-bold uppercase hover:bg-white/5 transition-colors ${language === lang ? 'text-yellow-500' : 'text-white/60'}`}
+                          className={`w-full px-3 py-2 md:px-4 md:py-3 text-left text-[10px] md:text-xs font-bold uppercase hover:bg-white/5 transition-colors ${language === lang ? 'text-yellow-500' : 'text-white/60'}`}
                         >
                           {lang === 'en' ? 'English' : lang === 'ko' ? '한국어' : '中文'}
                         </button>
@@ -459,8 +459,8 @@ export default function App() {
                   )}
                 </AnimatePresence>
               </div>
-              <button className="p-2.5 bg-white/5 text-white/40 rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
-                <Settings size={18} />
+              <button className="p-1.5 md:p-2.5 bg-white/5 text-white/40 rounded-lg md:rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
+                <Settings size={16} className="md:w-[18px] md:h-[18px]" />
               </button>
             </div>
           </div>
@@ -477,15 +477,15 @@ export default function App() {
                 className="w-full max-w-none px-4 lg:px-8 space-y-8"
               >
                 {/* Global Jackpot Banner */}
-                <div className="relative h-24 rounded-3xl bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border border-yellow-500/30 overflow-hidden flex items-center justify-between px-12 shadow-[0_0_50px_rgba(234,179,8,0.1)]">
+                <div className="relative h-16 md:h-20 lg:h-24 rounded-2xl md:rounded-3xl bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border border-yellow-500/30 overflow-hidden flex items-center justify-between px-4 md:px-8 lg:px-12 shadow-[0_0_50px_rgba(234,179,8,0.1)]">
                   <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #d4af37 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-                  <div className="flex items-center gap-6 relative z-10">
-                    <div className="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-black shadow-lg shadow-yellow-500/40 animate-pulse">
-                      <Trophy size={24} />
+                  <div className="flex items-center gap-2 md:gap-4 lg:gap-6 relative z-10">
+                    <div className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full bg-yellow-500 flex items-center justify-center text-black shadow-lg shadow-yellow-500/40 animate-pulse">
+                      <Trophy size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-500/60">{t('globalJackpot')}</span>
-                      <h2 className="text-4xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 drop-shadow-sm">1,245,890.00{t('currency')}</h2>
+                      <span className="text-[8px] md:text-[9px] lg:text-[10px] font-black uppercase tracking-[0.15em] md:tracking-[0.2em] lg:tracking-[0.3em] text-yellow-500/60">{t('globalJackpot')}</span>
+                      <h2 className="text-xl md:text-3xl lg:text-4xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 drop-shadow-sm">1,245,890.00{t('currency')}</h2>
                     </div>
                   </div>
                   <div className="hidden md:flex gap-2 relative z-10">
@@ -500,12 +500,12 @@ export default function App() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   {/* Main Game Modes */}
                   <div className="lg:col-span-8 space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <motion.button
                         whileHover={{ scale: 1.02, y: -5 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setLobbyView('tournaments')}
-                        className="relative h-72 rounded-[40px] bg-gradient-to-br from-red-600 to-red-950 p-10 flex flex-col justify-end overflow-hidden shadow-2xl group border border-red-500/30"
+                        className="relative h-48 md:h-60 lg:h-72 rounded-3xl md:rounded-[40px] bg-gradient-to-br from-red-600 to-red-950 p-6 md:p-8 lg:p-10 flex flex-col justify-end overflow-hidden shadow-2xl group border border-red-500/30"
                       >
                         {/* Poker Table Background Image */}
                         <div className="absolute inset-0 opacity-30 group-hover:opacity-40 transition-opacity duration-700"
@@ -519,12 +519,12 @@ export default function App() {
                           <Trophy size={300} className="text-white -mr-10 -mt-10" />
                         </div>
                         <div className="relative z-10 text-left">
-                          <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">Live Now</span>
-                            <span className="px-3 py-1 bg-yellow-500 text-black rounded-full text-[10px] font-black uppercase tracking-widest">10M {t('gtd')}</span>
+                          <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                            <span className="px-2 py-0.5 md:px-3 md:py-1 bg-white/20 backdrop-blur-md rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-wider md:tracking-widest">Live Now</span>
+                            <span className="px-2 py-0.5 md:px-3 md:py-1 bg-yellow-500 text-black rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-wider md:tracking-widest">10M {t('gtd')}</span>
                           </div>
-                          <h3 className="text-5xl font-black uppercase tracking-tighter italic leading-none mb-2">{t('tournament')}</h3>
-                          <p className="text-white/60 text-sm font-medium uppercase tracking-widest">{t('wsopMainEvent')} • {t('worldSeries')}</p>
+                          <h3 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter italic leading-none mb-1 md:mb-2">{t('tournament')}</h3>
+                          <p className="text-white/60 text-xs md:text-sm font-medium uppercase tracking-wide md:tracking-widest">{t('wsopMainEvent')} • {t('worldSeries')}</p>
                         </div>
                       </motion.button>
 
@@ -532,7 +532,7 @@ export default function App() {
                         whileHover={{ scale: 1.02, y: -5 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => initGame('cash')}
-                        className="relative h-72 rounded-[40px] bg-gradient-to-br from-emerald-600 to-emerald-950 p-10 flex flex-col justify-end overflow-hidden shadow-2xl group border border-emerald-500/30"
+                        className="relative h-48 md:h-60 lg:h-72 rounded-3xl md:rounded-[40px] bg-gradient-to-br from-emerald-600 to-emerald-950 p-6 md:p-8 lg:p-10 flex flex-col justify-end overflow-hidden shadow-2xl group border border-emerald-500/30"
                       >
                         {/* Poker Chips Background Image */}
                         <div className="absolute inset-0 opacity-30 group-hover:opacity-40 transition-opacity duration-700"
@@ -546,17 +546,17 @@ export default function App() {
                           <Coins size={300} className="text-white -mr-10 -mt-10" />
                         </div>
                         <div className="relative z-10 text-left">
-                          <div className="flex items-center gap-3 mb-4">
-                            <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">{t('instantAction')}</span>
+                          <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                            <span className="px-2 py-0.5 md:px-3 md:py-1 bg-white/20 backdrop-blur-md rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-wider md:tracking-widest">{t('instantAction')}</span>
                           </div>
-                          <h3 className="text-5xl font-black uppercase tracking-tighter italic leading-none mb-2">{t('cashGame')}</h3>
-                          <p className="text-white/60 text-sm font-medium uppercase tracking-widest">{t('noLimitHoldem')} • {t('blinds')} 50/100</p>
+                          <h3 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter italic leading-none mb-1 md:mb-2">{t('cashGame')}</h3>
+                          <p className="text-white/60 text-xs md:text-sm font-medium uppercase tracking-wide md:tracking-widest">{t('noLimitHoldem')} • {t('blinds')} 50/100</p>
                         </div>
                       </motion.button>
                     </div>
 
                     {/* Secondary Game Modes */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
                       {[
                         { id: 'sit-and-go', title: t('sitAndGo'), icon: <Timer />, color: 'from-blue-600 to-blue-950', action: () => initGame('sit-and-go'), bg: 'https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=400&q=80' },
                         { id: 'private', title: t('privateTable'), icon: <Users />, color: 'from-purple-600 to-purple-950', action: () => null, bg: 'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=400&q=80' },
@@ -568,7 +568,7 @@ export default function App() {
                           whileHover={{ y: -5 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={mode.action}
-                          className={`relative h-32 rounded-3xl bg-gradient-to-br ${mode.color} p-6 flex flex-col justify-between overflow-hidden shadow-xl border border-white/10 group`}
+                          className={`relative h-24 md:h-28 lg:h-32 rounded-2xl md:rounded-3xl bg-gradient-to-br ${mode.color} p-4 md:p-5 lg:p-6 flex flex-col justify-between overflow-hidden shadow-xl border border-white/10 group`}
                         >
                           <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity"
                                style={{
@@ -577,9 +577,9 @@ export default function App() {
                                  backgroundPosition: 'center'
                                }} />
                           <div className="absolute inset-0 bg-gradient-to-br ${mode.color} opacity-70" />
-                          <div className="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-500 z-10">{mode.icon}</div>
-                          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center mb-2 relative z-10">{mode.icon}</div>
-                          <h4 className="text-sm font-black uppercase tracking-tighter italic leading-none relative z-10">{mode.title}</h4>
+                          <div className="absolute top-1 right-1 md:top-2 md:right-2 opacity-10 group-hover:scale-110 transition-transform duration-500 z-10 scale-75 md:scale-100">{mode.icon}</div>
+                          <div className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 rounded-lg bg-white/10 flex items-center justify-center mb-1 md:mb-2 relative z-10 scale-75 md:scale-90 lg:scale-100">{mode.icon}</div>
+                          <h4 className="text-[10px] md:text-xs lg:text-sm font-black uppercase tracking-tighter italic leading-none relative z-10">{mode.title}</h4>
                         </motion.button>
                       ))}
                     </div>
