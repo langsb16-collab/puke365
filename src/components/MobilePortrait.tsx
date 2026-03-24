@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { GameState } from '../types';
 import { useTranslation } from '../LanguageContext';
+import { motion } from 'framer-motion';
 
 interface MobilePortraitProps {
   gameState: GameState;
@@ -301,11 +302,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
             <div
               key={i}
               onClick={() => togglePeek(i)}
-              className="cursor-pointer relative"
-              style={{
-                transform: isPeek ? 'scale(1.02)' : 'none',
-                transition: 'transform 0.3s ease',
-              }}
+              className="cursor-pointer relative w-16 h-[88px]"
             >
               {/* 항상 뒷면 카드 */}
               <div 
@@ -328,30 +325,29 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                 </div>
               </div>
 
-              {/* 55% 완전 평면 슬라이드 */}
-              <div
-                className="absolute top-0 right-0 w-[55%] h-full overflow-hidden pointer-events-none"
-                style={{
-                  transform: isPeek ? 'translateX(-32px)' : 'translateX(0)',
-                  opacity: isPeek ? 1 : 0,
-                  transition: 'all 0.3s ease',
+              {/* 앞면 슬라이드 */}
+              <motion.div
+                initial={false}
+                animate={{
+                  x: isPeek ? -100 : 0,
+                  y: isPeek ? -4 : 0,
                 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                className="absolute inset-0 bg-white rounded-2xl shadow-2xl pointer-events-none"
+                style={{ zIndex: isPeek ? 20 : 5 }}
               >
-                {/* 실제 카드 절반 (완전 평면) */}
-                <div className="w-[200%] h-full flex justify-end">
-                  <div className="w-[55%] h-full bg-white rounded-2xl shadow-2xl relative border-2 border-gray-200">
-                    {/* 숫자 + 무늬 (평면) */}
-                    <div className="absolute top-3 right-3 text-right leading-none">
-                      <div className={`text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                        {card?.rank}
-                      </div>
-                      <div className={`text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                        {SUIT_SYMBOL[card?.suit || 'spades']}
-                      </div>
-                    </div>
+                <div className="absolute top-2 left-2 leading-none">
+                  <div className={`text-lg font-black ${SUIT_COLOR[card.suit]}`}>
+                    {card.rank}
+                  </div>
+                  <div className={`text-sm ${SUIT_COLOR[card.suit]}`}>
+                    {SUIT_SYMBOL[card.suit]}
                   </div>
                 </div>
-              </div>
+                <div className={`absolute inset-0 flex items-center justify-center text-2xl opacity-80 ${SUIT_COLOR[card.suit]}`}>
+                  {SUIT_SYMBOL[card.suit]}
+                </div>
+              </motion.div>
             </div>
           );
         })}
