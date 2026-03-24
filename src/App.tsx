@@ -824,7 +824,7 @@ export default function App() {
       <>
         {/* Card Squeeze Overlay */}
         <AnimatePresence>
-          {squeezeCardIndex !== null && user && user.cards[squeezeCardIndex] && (
+          {squeezeCardIndex !== null && user && (user.cards ?? [])[squeezeCardIndex] && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -834,7 +834,7 @@ export default function App() {
             >
               <div onClick={(e) => e.stopPropagation()}>
                 <CardSqueeze 
-                  card={user.cards[squeezeCardIndex]} 
+                  card={(user.cards ?? [])[squeezeCardIndex]} 
                   onComplete={handleSqueezeComplete}
                   className="scale-75"
                 />
@@ -1047,7 +1047,7 @@ export default function App() {
 
         {/* Card Squeeze Overlay */}
         <AnimatePresence>
-          {squeezeCardIndex !== null && user && user.cards[squeezeCardIndex] && (
+          {squeezeCardIndex !== null && user && (user.cards ?? [])[squeezeCardIndex] && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1057,7 +1057,7 @@ export default function App() {
             >
               <div onClick={(e) => e.stopPropagation()}>
                 <CardSqueeze 
-                  card={user.cards[squeezeCardIndex]} 
+                  card={(user.cards ?? [])[squeezeCardIndex]} 
                   onComplete={handleSqueezeComplete}
                   className="scale-75 md:scale-90 lg:scale-100"
                 />
