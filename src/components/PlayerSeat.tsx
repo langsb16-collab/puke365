@@ -113,13 +113,13 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
                 className="relative cursor-pointer select-none"
                 animate={{
-                  y: isPeek ? -8 : 0,
-                  scale: isPeek ? 1.03 : 1,
+                  y: isPeek ? -12 : 0,
+                  scale: isPeek ? 1.05 : 1,
                 }}
                 transition={{
                   type: "spring",
                   stiffness: 280,
-                  damping: 20,
+                  damping: 18,
                 }}
               >
                 {/* 항상 뒷면 */}
@@ -129,28 +129,33 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 {!player.isAI && (
                   <motion.div
                     animate={{
-                      x: isPeek ? -28 : 0,
-                      y: isPeek ? 8 : 0,
+                      x: isPeek ? -40 : 0,
+                      y: isPeek ? 10 : 0,
                       opacity: isPeek ? 1 : 0,
                     }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                    className="absolute top-0 right-0 w-[50%] h-full overflow-hidden pointer-events-none"
+                    transition={{ type: "spring", stiffness: 240, damping: 18 }}
+                    className="absolute top-0 right-0 w-[55%] h-full overflow-hidden pointer-events-none"
                     style={{
                       borderTopRightRadius: "12px",
                       borderBottomRightRadius: "12px",
+                      boxShadow: isPeek ? '0px 8px 20px rgba(0,0,0,0.4)' : 'none',
                     }}
                   >
                     {/* 진짜 카드 절반 */}
-                    <div className="w-[200%] h-full flex justify-end">
-                      <div className="w-1/2 h-full bg-white rounded-xl shadow-lg relative">
-                        {/* 숫자 */}
+                    <div className="w-[182%] h-full flex justify-end">
+                      <div className="w-[55%] h-full bg-white rounded-xl shadow-xl relative border border-gray-200">
+                        {/* 숫자 + 무늬 */}
                         <div className="absolute top-2 right-2 text-right leading-none">
-                          <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          <div className={`text-xl sm:text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                             {card?.rank}
                           </div>
-                          <div className={`text-base ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          <div className={`text-lg sm:text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
                             {SUIT_SYMBOL[card?.suit || 'spades']}
                           </div>
+                        </div>
+                        {/* 중앙 무늬 */}
+                        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl sm:text-5xl opacity-10 ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          {SUIT_SYMBOL[card?.suit || 'spades']}
                         </div>
                       </div>
                     </div>
