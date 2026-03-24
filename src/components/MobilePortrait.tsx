@@ -299,6 +299,12 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
               key={i}
               onClick={() => handleCardClick?.(i)}
               className="cursor-pointer relative"
+              animate={{
+                rotate: squeezedCards.has(i) ? (i === 0 ? -6 : 6) : 0,
+                y: squeezedCards.has(i) ? -14 : 0,
+                scale: squeezedCards.has(i) ? 1.06 : 1,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 18 }}
               whileHover={{ scale: 1.05, y: -12 }}
               whileTap={{ scale: 0.98 }}
               style={{
