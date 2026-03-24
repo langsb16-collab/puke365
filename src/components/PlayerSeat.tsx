@@ -113,51 +113,51 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
                 className="relative cursor-pointer select-none"
                 animate={{
-                  rotate: isPeek ? (i === 0 ? -14 : 14) : 0,
-                  y: isPeek ? -20 : 0,
-                  scale: isPeek ? 1.08 : 1,
-                  x: isPeek ? [0, -2, 2, -1, 1, 0] : 0,
+                  rotate: isPeek ? (i === 0 ? -18 : 18) : 0,
+                  y: isPeek ? -24 : 0,
+                  scale: isPeek ? 1.12 : 1,
+                  x: isPeek ? [0, -3, 3, -2, 2, 0] : 0,
                 }}
                 transition={{
                   type: "spring",
-                  stiffness: 320,
-                  damping: 16,
-                  x: { duration: 0.4 },
+                  stiffness: 340,
+                  damping: 14,
+                  x: { duration: 0.5 },
                 }}
               >
-                {/* 기본: 항상 뒷면 / 쇼다운만 오픈 */}
-                <Card card={card} hidden={!isShowdown} />
+                {/* 항상 뒷면 */}
+                <Card card={card} hidden={true} />
 
-                {/* 3/4 코너 강제 오픈 */}
-                {!player.isAI && !isShowdown && (
+                {/* 4/5 코너 강제 오픈 (40% 휘어짐) */}
+                {!player.isAI && (
                   <motion.div
                     animate={{
-                      x: isPeek ? -22 : 0,
-                      y: isPeek ? 22 : 0,
-                      rotate: isPeek ? -28 : 0,
+                      x: isPeek ? -32 : 0,
+                      y: isPeek ? 32 : 0,
+                      rotate: isPeek ? -35 : 0,
                       opacity: isPeek ? 1 : 0,
                     }}
-                    transition={{ type: "spring", stiffness: 280 }}
-                    className="absolute top-0 right-0 w-[75%] h-[75%] pointer-events-none"
+                    transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                    className="absolute top-0 right-0 w-[80%] h-[80%] pointer-events-none"
                     style={{
                       clipPath: "polygon(0 0, 100% 0, 100% 100%)",
                       transformOrigin: "top right",
                       transform: isPeek
-                        ? "perspective(900px) rotateX(45deg) rotateY(-25deg) skewY(-18deg)"
+                        ? "perspective(1200px) rotateX(60deg) rotateY(-35deg) skewY(-25deg)"
                         : "none",
                       background: "white",
-                      borderBottomLeftRadius: "16px",
+                      borderBottomLeftRadius: "18px",
                       boxShadow: isPeek
-                        ? "0px 20px 40px rgba(0,0,0,0.7)"
+                        ? "0px 24px 50px rgba(0,0,0,0.8)"
                         : "none",
                     }}
                   >
                     {/* 숫자 + 무늬 (평면 고정) */}
-                    <div className="absolute top-2 right-2 text-right leading-none">
-                      <div className={`text-xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                    <div className="absolute top-3 right-3 text-right leading-none">
+                      <div className={`text-2xl sm:text-3xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {card?.rank}
                       </div>
-                      <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className={`text-lg sm:text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {SUIT_SYMBOL[card?.suit || 'spades']}
                       </div>
                     </div>

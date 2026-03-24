@@ -30,28 +30,29 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
   squeezedCards = new Set()
 }) => {
   const { t } = useTranslation();
-  const [squeezed, setSqueezed] = useState(false);
+  const [peeked, setPeeked] = useState<Record<number, boolean>>({});
 
-  const handleSqueeze = () => {
-    setSqueezed(prev => !prev);
+  const togglePeek = (i: number) => {
+    setPeeked(prev => ({ ...prev, [i]: !prev[i] }));
     const audio = new Audio("/sounds/flip.mp3");
+    audio.volume = 0.6;
     audio.currentTime = 0;
     audio.play().catch(() => {});
-    if (navigator.vibrate) navigator.vibrate(15);
+    if (navigator.vibrate) navigator.vibrate(20);
   };
 
-  const SUIT_SYMBOLS: Record<string, string> = {
-    hearts: '♥',
-    diamonds: '♦',
-    clubs: '♣',
-    spades: '♠',
+  const SUIT_SYMBOL: Record<string, string> = {
+    hearts: "♥",
+    diamonds: "♦",
+    clubs: "♣",
+    spades: "♠",
   };
 
-  const SUIT_COLORS: Record<string, string> = {
-    hearts: 'text-red-600',
-    diamonds: 'text-red-600',
-    clubs: 'text-gray-900',
-    spades: 'text-gray-900',
+  const SUIT_COLOR: Record<string, string> = {
+    hearts: "text-red-500",
+    diamonds: "text-red-500",
+    clubs: "text-black",
+    spades: "text-black",
   };
 
   // 플레이어 위치 (타원 외곽 따라 배치 - 더 정확한 좌표)
@@ -173,11 +174,11 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                       boxShadow: '0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.1)',
                     }}
                   >
-                    <span className={`text-3xl font-black ${SUIT_COLORS[card.suit]}`}>
+                    <span className={`text-3xl font-black ${SUIT_COLOR[card.suit]}`}>
                       {card.rank}
                     </span>
-                    <span className={`text-2xl ${SUIT_COLORS[card.suit]}`}>
-                      {SUIT_SYMBOLS[card.suit]}
+                    <span className={`text-2xl ${SUIT_COLOR[card.suit]}`}>
+                      {SUIT_SYMBOL[card.suit]}
                     </span>
                   </div>
                 ))}
@@ -244,11 +245,11 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                             <div 
                               className="w-9 h-12 bg-white rounded-md shadow-xl flex flex-col items-center justify-center border border-gray-200"
                             >
-                              <span className={`text-base font-black ${SUIT_COLORS[card.suit]}`}>
+                              <span className={`text-base font-black ${SUIT_COLOR[card.suit]}`}>
                                 {card.rank}
                               </span>
-                              <span className={`text-xs ${SUIT_COLORS[card.suit]}`}>
-                                {SUIT_SYMBOLS[card.suit]}
+                              <span className={`text-xs ${SUIT_COLOR[card.suit]}`}>
+                                {SUIT_SYMBOL[card.suit]}
                               </span>
                             </div>
                           ) : (
@@ -293,63 +294,68 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
 
       {/* ========== 내 카드 (하단 중앙, 크게) ========== */}
       <div className="flex justify-center gap-3 px-4 pb-3 z-40">
-        {(user?.cards ?? []).map((card: any, i: number) => (
-          <div
-            key={i}
-            onClick={handleSqueeze}
-            className="cursor-pointer relative"
-            style={{
-              transform: squeezed ? (i === 0 ? 'rotate(-10deg) translateY(-16px) scale(1.06)' : 'rotate(10deg) translateY(-16px) scale(1.06)') : 'none',
-              transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            }}
-          >
-            {/* 항상 뒷면 카드 */}
-            <div 
-              className="w-16 h-[88px] bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 rounded-2xl shadow-2xl flex items-center justify-center border-3 border-orange-400/50 relative overflow-hidden"
-            >
-              {/* 패턴 */}
-              <div className="absolute inset-0 opacity-30">
-                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <pattern id={`card-pattern-${i}`} x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-                      <circle cx="15" cy="15" r="5" fill="#fbbf24" opacity="0.4"/>
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill={`url(#card-pattern-${i})`}/>
-                </svg>
-              </div>
-              
-              {/* 중앙 심볼 */}
-              <div className="relative z-10 flex flex-col items-center gap-1">
-                <div className="text-yellow-200/60 text-3xl">👑</div>
-                <div className="text-yellow-200/50 text-[10px] font-black italic tracking-wider">CHUANQI</div>
-              </div>
-            </div>
+        {(user?.cards ?? []).map((card: any, i: number) => {
+          const isPeek = peeked[i];
 
-            {/* 코너 1/3 휘어짐 + 숫자 노출 */}
+          return (
             <div
-              className="absolute top-0 right-0 w-[34%] h-[34%] pointer-events-none flex items-start justify-end"
+              key={i}
+              onClick={() => togglePeek(i)}
+              className="cursor-pointer relative"
               style={{
-                clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
-                transformOrigin: 'top right',
-                transform: squeezed
-                  ? 'perspective(600px) rotateX(25deg) skewY(-8deg) translate(-12px, 12px) rotate(-20deg)'
-                  : 'perspective(600px) rotateX(0deg) skewY(0deg)',
-                background: 'white',
-                borderBottomLeftRadius: '12px',
-                boxShadow: squeezed ? '0px 12px 25px rgba(0,0,0,0.5)' : 'none',
-                opacity: squeezed ? 1 : 0,
-                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                transform: isPeek ? (i === 0 ? 'rotate(-18deg) translateY(-24px) scale(1.12)' : 'rotate(18deg) translateY(-24px) scale(1.12)') : 'none',
+                transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
               }}
             >
-              <div className="flex justify-end p-1">
-                <span className="text-sm font-bold text-black">
-                  {card?.rank}
-                </span>
+              {/* 항상 뒷면 카드 */}
+              <div 
+                className="w-16 h-[88px] bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 rounded-2xl shadow-2xl flex items-center justify-center border-3 border-orange-400/50 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 opacity-30">
+                  <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <pattern id={`card-pattern-${i}`} x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <circle cx="15" cy="15" r="5" fill="#fbbf24" opacity="0.4"/>
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill={`url(#card-pattern-${i})`}/>
+                  </svg>
+                </div>
+                
+                <div className="relative z-10 flex flex-col items-center gap-1">
+                  <div className="text-yellow-200/60 text-3xl">👑</div>
+                  <div className="text-yellow-200/50 text-[10px] font-black italic tracking-wider">CHUANQI</div>
+                </div>
+              </div>
+
+              {/* 4/5 코너 강제 오픈 (40% 휘어짐) */}
+              <div
+                className="absolute top-0 right-0 w-[80%] h-[80%] pointer-events-none"
+                style={{
+                  clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
+                  transformOrigin: 'top right',
+                  transform: isPeek
+                    ? 'perspective(1200px) rotateX(60deg) rotateY(-35deg) skewY(-25deg) translate(-32px, 32px) rotate(-35deg)'
+                    : 'perspective(1200px) rotateX(0deg) rotateY(0deg) skewY(0deg)',
+                  background: 'white',
+                  borderBottomLeftRadius: '18px',
+                  boxShadow: isPeek ? '0px 24px 50px rgba(0,0,0,0.8)' : 'none',
+                  opacity: isPeek ? 1 : 0,
+                  transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                }}
+              >
+                <div className="absolute top-3 right-3 text-right leading-none">
+                  <div className={`text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                    {card?.rank}
+                  </div>
+                  <div className={`text-lg ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                    {SUIT_SYMBOL[card?.suit || 'spades']}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ========== 액션 버튼 (4열 그리드, Hello Pokers 스타일) ========== */}
