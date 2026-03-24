@@ -395,6 +395,8 @@ export default function App() {
 
   if (!gameState) return null;
 
+  if (!gameState) return null;
+
   if (gameState.mode === 'lobby') {
     return (
       <div className="min-h-screen bg-[#0b0b0f] text-white flex flex-col font-sans selection:bg-yellow-500/30 overflow-hidden">
@@ -812,10 +814,13 @@ export default function App() {
     );
   }
 
-  const user = gameState.players.find(p => p.id === 'user');
-  if (!user) return null;
+  const user = gameState?.players?.find(p => p?.id === 'user');
+  if (!user) {
+    console.error('User not found in players');
+    return null;
+  }
   
-  const isUserTurn = gameState.activePlayerIndex === gameState.players.findIndex(p => p.id === 'user') && !isProcessing;
+  const isUserTurn = gameState?.activePlayerIndex === gameState?.players?.findIndex(p => p?.id === 'user') && !isProcessing;
 
   // 🚨 모바일 전용 UI 분기
   if (deviceType === 'mobile') {
