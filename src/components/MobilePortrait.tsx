@@ -31,15 +31,14 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
   squeezedCards = new Set()
 }) => {
   const { t } = useTranslation();
-  const [peeked, setPeeked] = useState<Record<number, boolean>>({});
+  const [openedIndex, setOpenedIndex] = useState<number | null>(null);
 
-  const togglePeek = (i: number) => {
-    setPeeked(prev => ({ ...prev, [i]: !prev[i] }));
-    const audio = new Audio("/sounds/flip.mp3");
-    audio.volume = 0.6;
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-    if (navigator.vibrate) navigator.vibrate(20);
+  const openCard = (i: number) => {
+    setOpenedIndex(prev => (prev === i ? null : i));
+    const a = new Audio("/sounds/card-slide.mp3");
+    a.currentTime = 0;
+    a.play().catch(() => {});
+    if (navigator.vibrate) navigator.vibrate(10);
   };
 
   const SUIT_SYMBOL: Record<string, string> = {
@@ -49,12 +48,8 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
     spades: "♠",
   };
 
-  const SUIT_COLOR: Record<string, string> = {
-    hearts: "text-red-500",
-    diamonds: "text-red-500",
-    clubs: "text-black",
-    spades: "text-black",
-  };
+  const SUIT_COLOR = (s: string) =>
+    s === "hearts" || s === "diamonds" ? "text-red-500" : "text-black";
 
   // 플레이어 위치 (타원 외곽 따라 배치 - 더 정확한 좌표)
   const positions = [
@@ -296,15 +291,15 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
       {/* ========== 내 카드 (하단 중앙, 크게) ========== */}
       <div className="flex justify-center gap-3 px-4 pb-3 z-40">
         {(user?.cards ?? []).map((card: any, i: number) => {
-          const isPeek = peeked[i];
+          const isOpen = openedIndex === i;
 
           return (
             <div
               key={i}
-              onClick={() => togglePeek(i)}
-              className="cursor-pointer relative w-16 h-[88px]"
+              onClick={() => openCard(i)}
+              className="cursor-pointer relative w-16 h-[88px] select-none"
             >
-              {/* 항상 뒷면 카드 */}
+              {/* ✅ 항상 뒷면 카드 */}
               <div 
                 className="w-16 h-[88px] bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 rounded-2xl shadow-2xl flex items-center justify-center border-3 border-orange-400/50 relative overflow-hidden"
               >
@@ -325,24 +320,27 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                 </div>
               </div>
 
-              {/* 앞면은 클릭 시에만 생성 */}
-              {isPeek && (
+              {/* ✅ 클릭 시에만 앞면 생성 → "열리는 느낌" */}
+              {isOpen && (
                 <motion.div
-                  initial={false}
-                  animate={{ x: -100, y: -4 }}
-                  transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                  initial={{ x: 0, opacity: 0.9 }}
+                  animate={{ x: -110, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                   className="absolute inset-0 bg-white rounded-2xl shadow-2xl pointer-events-none"
-                  style={{ zIndex: 20 }}
+                  style={{ zIndex: 50 }}
                 >
+                  {/* 좌상단 숫자 */}
                   <div className="absolute top-2 left-2 leading-none">
-                    <div className={`text-lg font-black ${SUIT_COLOR[card.suit]}`}>
+                    <div className={`text-lg font-black ${SUIT_COLOR(card.suit)}`}>
                       {card.rank}
                     </div>
-                    <div className={`text-sm ${SUIT_COLOR[card.suit]}`}>
+                    <div className={`text-sm ${SUIT_COLOR(card.suit)}`}>
                       {SUIT_SYMBOL[card.suit]}
                     </div>
                   </div>
-                  <div className={`absolute inset-0 flex items-center justify-center text-2xl opacity-80 ${SUIT_COLOR[card.suit]}`}>
+
+                  {/* 중앙 무늬 */}
+                  <div className={`absolute inset-0 flex items-center justify-center text-2xl opacity-80 ${SUIT_COLOR(card.suit)}`}>
                     {SUIT_SYMBOL[card.suit]}
                   </div>
                 </motion.div>

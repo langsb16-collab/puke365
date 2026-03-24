@@ -12,12 +12,8 @@ const SUIT_SYMBOL: Record<string, string> = {
   spades: "♠",
 };
 
-const SUIT_COLOR: Record<string, string> = {
-  hearts: "text-red-500",
-  diamonds: "text-red-500",
-  clubs: "text-black",
-  spades: "text-black",
-};
+const SUIT_COLOR = (s: string) =>
+  s === "hearts" || s === "diamonds" ? "text-red-500" : "text-black";
 
 interface PlayerSeatProps {
   player: Player;
@@ -37,22 +33,21 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
   gameStage = ''
 }) => {
   const { t } = useTranslation();
-  const [peeked, setPeeked] = useState<Record<number, boolean>>({});
+  const [openedIndex, setOpenedIndex] = useState<number | null>(null);
   
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const isFolded = player?.isFolded || false;
   
   if (!player) return null;
 
-  const togglePeek = (i: number) => {
-    setPeeked(prev => ({ ...prev, [i]: !prev[i] }));
+  const openCard = (i: number) => {
+    if (player.isAI) return;
+    setOpenedIndex(prev => (prev === i ? null : i));
 
-    const flip = new Audio("/sounds/flip.mp3");
-    flip.volume = 0.6;
-    flip.currentTime = 0;
-    flip.play().catch(() => {});
+    const a = new Audio("/sounds/card-slide.mp3");
+    a.currentTime = 0;
+    a.play().catch(() => {});
 
-    if (navigator.vibrate) navigator.vibrate(20);
+    if (navigator.vibrate) navigator.vibrate(10);
   };
 
   const isShowdown = gameStage === 'showdown';
@@ -106,35 +101,38 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         {/* Cards */}
         <div className="flex -space-x-5 mb-1">
           {(player?.cards ?? []).map((card, i) => {
-            const isPeek = peeked[i];
+            const isOpen = openedIndex === i;
 
             return (
               <div
                 key={`${player.id}-${i}`}
-                className="relative cursor-pointer w-16 h-24"
-                onClick={!player.isAI ? () => togglePeek(i) : undefined}
+                className="relative w-16 h-24 cursor-pointer select-none"
+                onClick={() => openCard(i)}
               >
-                {/* 항상 뒷면 카드 */}
+                {/* ✅ 항상 뒷면 */}
                 <Card card={card} hidden={true} />
 
-                {/* 앞면은 클릭 시에만 생성 */}
-                {isPeek && (
+                {/* ✅ 클릭 시에만 앞면 생성 → "열리는 느낌" */}
+                {isOpen && (
                   <motion.div
-                    initial={false}
-                    animate={{ x: -110, y: -4 }}
-                    transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                    initial={{ x: 0, opacity: 0.9 }}
+                    animate={{ x: -110, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                     className="absolute inset-0 bg-white rounded-xl shadow-2xl pointer-events-none"
-                    style={{ zIndex: 20 }}
+                    style={{ zIndex: 50 }}
                   >
+                    {/* 좌상단 숫자 */}
                     <div className="absolute top-2 left-2 leading-none">
-                      <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className={`text-lg font-black ${SUIT_COLOR(card?.suit || 'spades')}`}>
                         {card?.rank}
                       </div>
-                      <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className={`text-sm ${SUIT_COLOR(card?.suit || 'spades')}`}>
                         {SUIT_SYMBOL[card?.suit || 'spades']}
                       </div>
                     </div>
-                    <div className={`absolute inset-0 flex items-center justify-center text-3xl opacity-80 ${SUIT_COLOR[card?.suit || 'spades']}`}>
+
+                    {/* 중앙 무늬 */}
+                    <div className={`absolute inset-0 flex items-center justify-center text-3xl opacity-80 ${SUIT_COLOR(card?.suit || 'spades')}`}>
                       {SUIT_SYMBOL[card?.suit || 'spades']}
                     </div>
                   </motion.div>
