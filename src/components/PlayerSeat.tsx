@@ -103,7 +103,13 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         )}
 
         {/* Cards - 바닥에 눕힌 평면 */}
-        <div className="flex -space-x-5 mb-1">
+        <div 
+          className="flex -space-x-5 mb-1"
+          style={{ 
+            transform: 'perspective(800px) rotateX(55deg)',
+            transformOrigin: 'center bottom'
+          }}
+        >
           {(player?.cards ?? []).map((card, i) => {
             const isPeek = peeked[i];
 
@@ -118,29 +124,29 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 }}
               >
                 {/* 뒷면 카드 (항상 표시) */}
-                <div className="w-20 h-28 sm:w-24 sm:h-32 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-600 rounded-xl shadow-2xl border-3 border-orange-400 relative overflow-hidden">
+                <div className="w-16 h-24 sm:w-20 sm:h-28 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-600 rounded-lg shadow-2xl border-2 border-orange-400 relative overflow-hidden">
                   <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-4xl">👑</div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl">👑</div>
                 </div>
 
                 {/* 쪼이기: 절반 슬라이드 오픈 */}
                 {!player.isAI && isPeek && (
                   <motion.div
                     initial={{ x: 0, opacity: 0 }}
-                    animate={{ x: -45, opacity: 1 }}
+                    animate={{ x: -35, opacity: 1 }}
                     exit={{ x: 0, opacity: 0 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     className="absolute top-0 right-0 w-[55%] h-full overflow-hidden pointer-events-none"
                   >
                     {/* 앞면 카드 절반 */}
                     <div className="w-[182%] h-full flex justify-end">
-                      <div className="w-20 h-28 sm:w-24 sm:h-32 bg-white rounded-xl shadow-2xl border-3 border-gray-300 relative">
+                      <div className="w-16 h-24 sm:w-20 sm:h-28 bg-white rounded-lg shadow-2xl border-2 border-gray-300 relative">
                         {/* 우측 상단 숫자+무늬 */}
-                        <div className="absolute top-3 right-3 text-right leading-tight">
-                          <div className={`text-4xl sm:text-5xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        <div className="absolute top-2 right-2 text-right leading-none">
+                          <div className={`text-2xl sm:text-3xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                             {card?.rank}
                           </div>
-                          <div className={`text-3xl sm:text-4xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          <div className={`text-xl sm:text-2xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
                             {SUIT_SYMBOL[card?.suit || 'spades']}
                           </div>
                         </div>
