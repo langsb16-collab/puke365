@@ -102,7 +102,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
           </motion.div>
         )}
 
-        {/* Cards */}
+        {/* Cards - 바닥에 눕힌 평면 */}
         <div className="flex -space-x-5 mb-1">
           {(player?.cards ?? []).map((card, i) => {
             const isPeek = peeked[i];
@@ -113,38 +113,40 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
                 className="relative cursor-pointer select-none"
                 style={{
-                  transform: isPeek ? 'scale(1.02)' : 'none',
+                  transform: isPeek ? 'scale(1.04)' : 'none',
                   transition: 'transform 0.3s ease',
                 }}
               >
-                {/* 항상 뒷면 */}
-                <Card card={card} hidden={true} />
+                {/* 뒷면 카드 (항상 표시) */}
+                <div className="w-20 h-28 sm:w-24 sm:h-32 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-600 rounded-xl shadow-2xl border-3 border-orange-400 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-4xl">👑</div>
+                </div>
 
-                {/* 55% 완전 평면 슬라이드 */}
-                {!player.isAI && (
-                  <div
+                {/* 쪼이기: 절반 슬라이드 오픈 */}
+                {!player.isAI && isPeek && (
+                  <motion.div
+                    initial={{ x: 0, opacity: 0 }}
+                    animate={{ x: -45, opacity: 1 }}
+                    exit={{ x: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     className="absolute top-0 right-0 w-[55%] h-full overflow-hidden pointer-events-none"
-                    style={{
-                      transform: isPeek ? 'translateX(-35px)' : 'translateX(0)',
-                      opacity: isPeek ? 1 : 0,
-                      transition: 'all 0.3s ease',
-                    }}
                   >
-                    {/* 실제 카드 절반 (완전 평면) */}
-                    <div className="w-[200%] h-full flex justify-end">
-                      <div className="w-[55%] h-full bg-white rounded-xl shadow-2xl relative border-2 border-gray-200">
-                        {/* 숫자 + 무늬 (평면) */}
-                        <div className="absolute top-3 right-3 text-right leading-none">
-                          <div className={`text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                    {/* 앞면 카드 절반 */}
+                    <div className="w-[182%] h-full flex justify-end">
+                      <div className="w-20 h-28 sm:w-24 sm:h-32 bg-white rounded-xl shadow-2xl border-3 border-gray-300 relative">
+                        {/* 우측 상단 숫자+무늬 */}
+                        <div className="absolute top-3 right-3 text-right leading-tight">
+                          <div className={`text-4xl sm:text-5xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                             {card?.rank}
                           </div>
-                          <div className={`text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                          <div className={`text-3xl sm:text-4xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
                             {SUIT_SYMBOL[card?.suit || 'spades']}
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
               </div>
             );
