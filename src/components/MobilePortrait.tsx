@@ -1,7 +1,7 @@
 import React from 'react';
 import { GameState } from '../types';
 import { useTranslation } from '../LanguageContext';
-import { motion, AnimatePresence } from 'motion/react';
+// motion import removed
 
 interface MobilePortraitProps {
   gameState: GameState;
@@ -134,9 +134,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
               transform: 'translate(-50%, -50%)',
             }}
           >
-            <motion.div
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+            <div
               className="bg-black/80 backdrop-blur-xl px-6 py-3 rounded-full border-2 border-yellow-500/50 shadow-2xl"
             >
               <div className="flex flex-col items-center">
@@ -145,7 +143,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                   {gameState.pot.toLocaleString()}{t('currency')}
                 </span>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* ========== 커뮤니티 카드 (상단 중앙) ========== */}
@@ -160,11 +158,8 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
             >
               <div className="flex gap-2">
                 {gameState.communityCards.map((card, i) => (
-                  <motion.div
+                  <div
                     key={i}
-                    initial={{ scale: 0, rotateY: 180 }}
-                    animate={{ scale: 1, rotateY: 0 }}
-                    transition={{ delay: i * 0.12, type: "spring" }}
                     className="w-14 h-20 bg-white rounded-xl shadow-2xl flex flex-col items-center justify-center border-2 border-gray-100"
                     style={{
                       boxShadow: '0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.1)',
@@ -176,7 +171,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                     <span className={`text-2xl ${SUIT_COLORS[card.suit]}`}>
                       {SUIT_SYMBOLS[card.suit]}
                     </span>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -200,12 +195,11 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                   transform: pos.transform,
                 }}
               >
-                <motion.div
-                  animate={{
-                    scale: gameState.activePlayerIndex === i ? 1.08 : 1,
+                <div
+                  className="flex flex-col items-center gap-1"
+                  style={{
                     opacity: p.isFolded ? 0.5 : 1,
                   }}
-                  className="flex flex-col items-center gap-1"
                 >
                   {/* 아바타 */}
                   <div className="relative">
@@ -274,17 +268,15 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
 
                   {/* 베팅액 */}
                   {p.currentBet > 0 && (
-                    <motion.div
-                      initial={{ scale: 0, y: 10 }}
-                      animate={{ scale: 1, y: 0 }}
+                    <div
                       className="bg-yellow-500/30 backdrop-blur-sm px-2 py-1 rounded-full border border-yellow-500/50"
                     >
                       <span className="text-yellow-200 text-[9px] font-bold font-mono">
                         {p.currentBet.toLocaleString()}
                       </span>
-                    </motion.div>
+                    </div>
                   )}
-                </motion.div>
+                </div>
               </div>
             );
           })}
@@ -319,13 +311,7 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                   <span className={`text-3xl ${SUIT_COLORS[card.suit]}`}>
                     {SUIT_SYMBOLS[card.suit]}
                   </span>
-                  
-                  {/* 빛나는 효과 */}
-                  <motion.div 
-                    animate={{ x: [-150, 200] }}
-                    transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1 }}
-                    className="absolute inset-0 w-24 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 pointer-events-none"
-                  />
+
                 </div>
               ) : (
                 // 뒷면 카드 (Hello Pokers 오렌지 스타일)
