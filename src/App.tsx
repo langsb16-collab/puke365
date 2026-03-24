@@ -12,6 +12,9 @@ import { CharacterSelectUI } from './components/CharacterSelectUI';
 import { ChatSystem } from './components/ChatSystem';
 import { CardSqueeze } from './components/CardSqueeze';
 import { AudioManager } from './services/AudioManager';
+import { useOrientation, useDeviceType } from './hooks/useOrientation';
+import { MobilePortrait } from './components/MobilePortrait';
+import { MobileLandscape } from './components/MobileLandscape';
 
 const INITIAL_CHIPS = 10000;
 const PLAYER_NAMES = ['Aria', 'Borgata', 'Caesars', 'Dunes', 'Encore', 'Flamingo', 'Golden', 'HardRock', 'Imperial'];
@@ -30,6 +33,10 @@ export default function App() {
   const [squeezeCardIndex, setSqueezeCardIndex] = useState<number | null>(null);
   const [squeezedCards, setSqueezedCards] = useState<Set<number>>(new Set());
   const audioManager = useRef<AudioManager>(AudioManager.getInstance());
+  
+  // 🚨 모바일 방향 감지 훅
+  const isLandscape = useOrientation();
+  const deviceType = useDeviceType();
 
   const selectedCharacter = POKER_CHARACTERS.find(c => c.id === selectedCharacterId) || POKER_CHARACTERS[0];
 
@@ -800,6 +807,65 @@ export default function App() {
   const user = gameState.players.find(p => p.id === 'user')!;
   const isUserTurn = gameState.activePlayerIndex === gameState.players.findIndex(p => p.id === 'user') && !isProcessing;
 
+  // 🚨 모바일 전용 UI 분기
+  if (deviceType === 'mobile') {
+    return (
+      <>
+        {/* Card Squeeze Overlay */}
+        <AnimatePresence>
+          {squeezeCardIndex !== null && user && user.cards[squeezeCardIndex] && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[200] flex items-center justify-center"
+              onClick={() => setSqueezeCardIndex(null)}
+            >
+              <div onClick={(e) => e.stopPropagation()}>
+                <CardSqueeze 
+                  card={user.cards[squeezeCardIndex]} 
+                  onComplete={handleSqueezeComplete}
+                  className="scale-75"
+                />
+              </div>
+              <button
+                onClick={() => setSqueezeCardIndex(null)}
+                className="absolute top-8 right-8 p-3 bg-white/10 hover:bg-white/20 rounded-full border border-white/20 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 모바일 UI: 방향에 따라 자동 전환 */}
+        {isLandscape ? (
+          <MobileLandscape 
+            gameState={gameState}
+            user={user}
+            isUserTurn={isUserTurn}
+            handleAction={handleAction}
+            handleCardClick={handleCardClick}
+            squeezedCards={squeezedCards}
+          />
+        ) : (
+          <MobilePortrait 
+            gameState={gameState}
+            user={user}
+            isUserTurn={isUserTurn}
+            handleAction={handleAction}
+            handleCardClick={handleCardClick}
+            squeezedCards={squeezedCards}
+          />
+        )}
+      </>
+    );
+  }
+
+  // 데스크톱 UI (기존 유지)
   return (
     <div className="min-h-screen w-full bg-[#0a0a0a] text-white font-sans selection:bg-yellow-500/30 overflow-x-hidden flex flex-col">
       {/* Responsive Header - Hidden on mobile, compact on tablet, full on desktop */}
