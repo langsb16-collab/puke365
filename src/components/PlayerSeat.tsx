@@ -111,7 +111,8 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
             return (
               <div
                 key={`${player.id}-${i}`}
-                className="relative"
+                className="relative cursor-pointer"
+                onClick={!player.isAI ? () => togglePeek(i) : undefined}
               >
                 {/* 뒷면 카드 */}
                 <Card card={card} hidden={true} />
@@ -119,33 +120,34 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 {/* PEEK */}
                 {!player.isAI && (
                   <motion.div
-                    onClick={() => togglePeek(i)}
                     animate={{
-                      y: isPeek ? -20 : 0,
-                      rotate: isPeek ? (isMobile ? -12 : -6) : 0,
+                      y: isPeek ? (isMobile ? -10 : -14) : 0,
                     }}
                     transition={{ type: 'spring', stiffness: 220 }}
-                    className="absolute top-0 left-0 w-full h-full pointer-events-auto cursor-pointer"
+                    className="absolute top-0 left-0 w-full h-full pointer-events-none"
                     style={{
-                      transformOrigin: 'bottom center',
+                      transformOrigin: 'bottom left',
                       transform: isPeek
                         ? isMobile
-                          ? 'perspective(1000px) rotateX(68deg)'
-                          : 'perspective(900px) rotateX(32deg)'
+                          ? 'perspective(900px) rotateX(50deg) translateY(-6px)'
+                          : 'perspective(900px) rotateX(34deg)'
                         : 'none',
                       clipPath: isPeek
-                        ? 'polygon(0 65%, 100% 45%, 100% 100%, 0% 100%)'
-                        : 'polygon(0 100%, 100% 100%, 100% 100%, 0% 100%)',
+                        ? 'polygon(0 72%, 100% 50%, 100% 100%, 0 100%)'
+                        : 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)',
+                      background: 'white',
+                      borderRadius: '12px',
+                      boxShadow: isPeek
+                        ? '0px 25px 50px rgba(0,0,0,0.8)'
+                        : 'none',
                     }}
                   >
-                    <div className="w-full h-full bg-white rounded-xl shadow-2xl relative">
-                      <div className="absolute top-2 left-2 leading-none">
-                        <div className={`text-xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                          {card?.rank}
-                        </div>
-                        <div className={`text-lg ${SUIT_COLOR[card?.suit || 'spades']}`}>
-                          {SUIT_SYMBOL[card?.suit || 'spades']}
-                        </div>
+                    <div className="absolute top-2 left-2 leading-none">
+                      <div className={`text-lg font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        {card?.rank}
+                      </div>
+                      <div className={`text-base ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        {SUIT_SYMBOL[card?.suit || 'spades']}
                       </div>
                     </div>
                   </motion.div>
