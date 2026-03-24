@@ -5,6 +5,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Bot } from 'lucide-react';
 import { useTranslation } from '../LanguageContext';
 
+const SUIT_SYMBOL: Record<string, string> = {
+  hearts: "♥",
+  diamonds: "♦",
+  clubs: "♣",
+  spades: "♠",
+};
+
+const SUIT_COLOR: Record<string, string> = {
+  hearts: "text-red-500",
+  diamonds: "text-red-500",
+  clubs: "text-black",
+  spades: "text-black",
+};
+
 interface PlayerSeatProps {
   player: Player;
   isActive: boolean;
@@ -32,11 +46,12 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
   const togglePeek = (i: number) => {
     setPeeked(prev => ({ ...prev, [i]: !prev[i] }));
 
-    const a = new Audio("/sounds/flip.mp3");
-    a.currentTime = 0;
-    a.play().catch(() => {});
+    const flip = new Audio("/sounds/flip.mp3");
+    flip.volume = 0.6;
+    flip.currentTime = 0;
+    flip.play().catch(() => {});
 
-    if (navigator.vibrate) navigator.vibrate(15);
+    if (navigator.vibrate) navigator.vibrate(20);
   };
 
   const isShowdown = gameStage === 'showdown';
@@ -90,7 +105,6 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
         {/* Cards */}
         <div className="flex -space-x-5 mb-1">
           {(player?.cards ?? []).map((card, i) => {
-            const isOpen = isShowdown;
             const isPeek = peeked[i];
 
             return (
@@ -99,43 +113,53 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
                 className="relative cursor-pointer select-none"
                 animate={{
-                  rotate: isPeek ? (i === 0 ? -10 : 10) : 0,
-                  y: isPeek ? -16 : 0,
-                  scale: isPeek ? 1.06 : 1,
+                  rotate: isPeek ? (i === 0 ? -14 : 14) : 0,
+                  y: isPeek ? -20 : 0,
+                  scale: isPeek ? 1.08 : 1,
+                  x: isPeek ? [0, -2, 2, -1, 1, 0] : 0,
                 }}
-                transition={{ type: "spring", stiffness: 320, damping: 18 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 320,
+                  damping: 16,
+                  x: { duration: 0.4 },
+                }}
               >
                 {/* 기본: 항상 뒷면 / 쇼다운만 오픈 */}
-                <Card card={card} hidden={!isOpen} />
+                <Card card={card} hidden={!isShowdown} />
 
-                {/* 1/2 코너 곡면 휘어짐 + 숫자 노출 */}
-                {!player.isAI && !isOpen && (
+                {/* 3/4 코너 강제 오픈 */}
+                {!player.isAI && !isShowdown && (
                   <motion.div
                     animate={{
-                      x: isPeek ? -16 : 0,
-                      y: isPeek ? 16 : 0,
-                      rotate: isPeek ? -22 : 0,
+                      x: isPeek ? -22 : 0,
+                      y: isPeek ? 22 : 0,
+                      rotate: isPeek ? -28 : 0,
                       opacity: isPeek ? 1 : 0,
                     }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="absolute top-0 right-0 w-[50%] h-[50%] pointer-events-none flex items-start justify-end"
+                    transition={{ type: "spring", stiffness: 280 }}
+                    className="absolute top-0 right-0 w-[75%] h-[75%] pointer-events-none"
                     style={{
                       clipPath: "polygon(0 0, 100% 0, 100% 100%)",
                       transformOrigin: "top right",
                       transform: isPeek
-                        ? "perspective(800px) rotateX(30deg) rotateY(-10deg) skewY(-12deg)"
+                        ? "perspective(900px) rotateX(45deg) rotateY(-25deg) skewY(-18deg)"
                         : "none",
                       background: "white",
-                      borderBottomLeftRadius: "14px",
+                      borderBottomLeftRadius: "16px",
                       boxShadow: isPeek
-                        ? "0px 16px 30px rgba(0,0,0,0.6)"
+                        ? "0px 20px 40px rgba(0,0,0,0.7)"
                         : "none",
                     }}
                   >
-                    <div className="pr-2 pt-2">
-                      <span className="text-base font-bold text-black leading-none">
+                    {/* 숫자 + 무늬 (평면 고정) */}
+                    <div className="absolute top-2 right-2 text-right leading-none">
+                      <div className={`text-xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {card?.rank}
-                      </span>
+                      </div>
+                      <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                        {SUIT_SYMBOL[card?.suit || 'spades']}
+                      </div>
                     </div>
                   </motion.div>
                 )}
