@@ -303,8 +303,8 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
               onClick={() => togglePeek(i)}
               className="cursor-pointer relative"
               style={{
-                transform: isPeek ? (i === 0 ? 'rotate(-18deg) translateY(-24px) scale(1.12)' : 'rotate(18deg) translateY(-24px) scale(1.12)') : 'none',
-                transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                transform: isPeek ? (i === 0 ? 'rotate(-6deg) translateY(-8px) scale(1.04)' : 'rotate(6deg) translateY(-8px) scale(1.04)') : 'none',
+                transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
               }}
             >
               {/* 항상 뒷면 카드 */}
@@ -328,27 +328,27 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                 </div>
               </div>
 
-              {/* 4/5 코너 강제 오픈 (40% 휘어짐) */}
+              {/* 40% 코너 평면 들기 */}
               <div
-                className="absolute top-0 right-0 w-[80%] h-[80%] pointer-events-none"
+                className="absolute top-0 right-0 w-[40%] h-[40%] pointer-events-none"
                 style={{
                   clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
                   transformOrigin: 'top right',
                   transform: isPeek
-                    ? 'perspective(1200px) rotateX(60deg) rotateY(-35deg) skewY(-25deg) translate(-32px, 32px) rotate(-35deg)'
-                    : 'perspective(1200px) rotateX(0deg) rotateY(0deg) skewY(0deg)',
+                    ? 'rotateZ(-8deg) translate(-6px, 6px) skewY(-4deg) translate(-10px, 10px) rotate(-10deg)'
+                    : 'none',
                   background: 'white',
-                  borderBottomLeftRadius: '18px',
-                  boxShadow: isPeek ? '0px 24px 50px rgba(0,0,0,0.8)' : 'none',
+                  borderBottomLeftRadius: '12px',
+                  boxShadow: isPeek ? '0px 10px 20px rgba(0,0,0,0.5)' : 'none',
                   opacity: isPeek ? 1 : 0,
-                  transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 }}
               >
-                <div className="absolute top-3 right-3 text-right leading-none">
-                  <div className={`text-2xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                <div className="absolute top-1 right-1 text-right leading-none">
+                  <div className={`text-base font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                     {card?.rank}
                   </div>
-                  <div className={`text-lg ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                  <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
                     {SUIT_SYMBOL[card?.suit || 'spades']}
                   </div>
                 </div>

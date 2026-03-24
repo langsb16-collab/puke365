@@ -113,51 +113,49 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                 onClick={!player.isAI ? () => togglePeek(i) : undefined}
                 className="relative cursor-pointer select-none"
                 animate={{
-                  rotate: isPeek ? (i === 0 ? -18 : 18) : 0,
-                  y: isPeek ? -24 : 0,
-                  scale: isPeek ? 1.12 : 1,
-                  x: isPeek ? [0, -3, 3, -2, 2, 0] : 0,
+                  rotate: isPeek ? (i === 0 ? -6 : 6) : 0,
+                  y: isPeek ? -8 : 0,
+                  scale: isPeek ? 1.04 : 1,
                 }}
                 transition={{
                   type: "spring",
-                  stiffness: 340,
-                  damping: 14,
-                  x: { duration: 0.5 },
+                  stiffness: 320,
+                  damping: 20,
                 }}
               >
                 {/* 항상 뒷면 */}
                 <Card card={card} hidden={true} />
 
-                {/* 4/5 코너 강제 오픈 (40% 휘어짐) */}
+                {/* 40% 코너 평면 들기 */}
                 {!player.isAI && (
                   <motion.div
                     animate={{
-                      x: isPeek ? -32 : 0,
-                      y: isPeek ? 32 : 0,
-                      rotate: isPeek ? -35 : 0,
+                      x: isPeek ? -10 : 0,
+                      y: isPeek ? 10 : 0,
+                      rotate: isPeek ? -10 : 0,
                       opacity: isPeek ? 1 : 0,
                     }}
-                    transition={{ type: "spring", stiffness: 260, damping: 18 }}
-                    className="absolute top-0 right-0 w-[80%] h-[80%] pointer-events-none"
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="absolute top-0 right-0 w-[40%] h-[40%] pointer-events-none"
                     style={{
                       clipPath: "polygon(0 0, 100% 0, 100% 100%)",
                       transformOrigin: "top right",
                       transform: isPeek
-                        ? "perspective(1200px) rotateX(60deg) rotateY(-35deg) skewY(-25deg)"
+                        ? "rotateZ(-8deg) translate(-6px, 6px) skewY(-4deg)"
                         : "none",
                       background: "white",
-                      borderBottomLeftRadius: "18px",
+                      borderBottomLeftRadius: "12px",
                       boxShadow: isPeek
-                        ? "0px 24px 50px rgba(0,0,0,0.8)"
+                        ? "0px 10px 20px rgba(0,0,0,0.5)"
                         : "none",
                     }}
                   >
-                    {/* 숫자 + 무늬 (평면 고정) */}
-                    <div className="absolute top-3 right-3 text-right leading-none">
-                      <div className={`text-2xl sm:text-3xl font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                    {/* 숫자 + 무늬 (절대 왜곡 없음) */}
+                    <div className="absolute top-1 right-1 text-right leading-none">
+                      <div className={`text-base font-black ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {card?.rank}
                       </div>
-                      <div className={`text-lg sm:text-xl ${SUIT_COLOR[card?.suit || 'spades']}`}>
+                      <div className={`text-sm ${SUIT_COLOR[card?.suit || 'spades']}`}>
                         {SUIT_SYMBOL[card?.suit || 'spades']}
                       </div>
                     </div>
