@@ -31,6 +31,20 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
   squeezedCards = new Set()
 }) => {
   const { t } = useTranslation();
+  
+  // 디버깅: 게임 상태 확인
+  React.useEffect(() => {
+    console.log('🎮 MobilePortrait Debug:', {
+      stage: gameState.stage,
+      players: gameState.players.map(p => ({
+        id: p.id,
+        name: p.name,
+        isAI: p.isAI,
+        hasCards: p.cards?.length || 0,
+        isFolded: p.isFolded
+      }))
+    });
+  }, [gameState.stage, gameState.players]);
 
   // 플레이어 위치 (헬로포커스 스타일)
   const positions = [
@@ -170,6 +184,9 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
         {gameState.players.map((p, i) => {
           if (p.id === 'user') return null;
           
+          // 카드 공개 조건: showdown 단계이거나 플레이어가 본인인 경우
+          const shouldShowCards = gameState.stage === 'showdown' && !p.isFolded;
+          
           return (
             <div 
               key={p.id}
@@ -208,6 +225,44 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                     </div>
                   )}
                 </div>
+
+                {/* 플레이어 카드 */}
+                {p.cards && p.cards.length > 0 && (
+                  <div className="flex gap-0.5 mt-1">
+                    {p.cards.map((card: any, cardIdx: number) => (
+                      <div key={cardIdx}>
+                        {shouldShowCards ? (
+                          // Showdown: 카드 공개
+                          <div 
+                            className={`
+                              w-[32px] h-[44px] bg-white rounded-md shadow-lg 
+                              flex flex-col items-center justify-center border border-gray-200
+                              ${cardIdx === 0 ? '-rotate-3' : 'rotate-3'}
+                            `}
+                          >
+                            <span className={`text-sm font-black ${SUIT_COLORS[card.suit]}`}>
+                              {card.rank}
+                            </span>
+                            <span className={`text-xs ${SUIT_COLORS[card.suit]}`}>
+                              {SUIT_SYMBOLS[card.suit]}
+                            </span>
+                          </div>
+                        ) : (
+                          // 플레이 중: 카드 뒷면
+                          <div 
+                            className={`
+                              w-[32px] h-[44px] bg-gradient-to-br from-red-800 to-red-950 rounded-md shadow-lg 
+                              flex items-center justify-center border border-white/20
+                              ${cardIdx === 0 ? '-rotate-3' : 'rotate-3'}
+                            `}
+                          >
+                            <div className="text-white/10 text-[6px] font-black">🃏</div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* 칩 정보 */}
                 <div className="bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/20">
