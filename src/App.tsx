@@ -46,7 +46,7 @@ export default function App() {
         id: 'user',
         name: selectedCharacter.name,
         chips: INITIAL_CHIPS,
-        cards: [],
+        cards: [], // ✅ 반드시 빈 배열로 초기화
         isDealer: false,
         isSmallBlind: false,
         isBigBlind: false,
@@ -64,7 +64,7 @@ export default function App() {
           id: `ai-${i}`,
           name: randomChar.name, // Use character name for AI too
           chips: INITIAL_CHIPS,
-          cards: [],
+          cards: [], // ✅ 반드시 빈 배열로 초기화
           isDealer: false,
           isSmallBlind: false,
           isBigBlind: false,

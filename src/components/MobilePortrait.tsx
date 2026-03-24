@@ -231,9 +231,9 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
                   </div>
 
                   {/* 플레이어 카드 */}
-                  {p.cards && p.cards.length > 0 && (
+                  {p.cards && Array.isArray(p.cards) && p.cards.length > 0 && (
                     <div className="flex gap-1 mt-1">
-                      {p.cards.map((card: any, cardIdx: number) => (
+                      {(p.cards || []).map((card: any, cardIdx: number) => (
                         <div key={cardIdx}>
                           {shouldShowCards ? (
                             // Showdown: 카드 공개
