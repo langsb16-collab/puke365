@@ -26,6 +26,7 @@ const SUIT_COLORS: Record<string, string> = {
 export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, className = '' }) => {
   const [isRevealed, setIsRevealed] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSqueezing, setIsSqueezing] = useState(false); // 클릭으로 40% 열림 상태
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const audio = AudioManager.getInstance();
@@ -44,6 +45,30 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
   const fingerX = useMotionValue(0);
   const fingerY = useMotionValue(0);
 
+  // 클릭으로 40% 열기 (가장자리 클릭 포함)
+  const handleClick = (event: React.MouseEvent) => {
+    if (!isSqueezing && !isRevealed) {
+      setIsSqueezing(true);
+      audio.playSynthesized('card'); // 종이 비벼지는 사운드
+      
+      // 클릭 위치에 따라 열리는 방향 결정 (더 리얼한 효과)
+      const rect = event.currentTarget.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const clickY = event.clientY - rect.top;
+      
+      // 왼쪽 가장자리(1/4): 왼쪽으로, 오른쪽 가장자리(3/4): 오른쪽으로
+      // 위쪽 가장자리(1/4): 위로, 아래쪽 가장자리(3/4): 아래로
+      const xPos = clickX < rect.width * 0.25 ? -45 : 
+                   clickX > rect.width * 0.75 ? 45 : 50;
+      const yPos = clickY < rect.height * 0.25 ? -45 : 
+                   clickY > rect.height * 0.75 ? 45 : -50;
+      
+      // 자동으로 40% 위치로 이동
+      x.set(xPos);
+      y.set(yPos);
+    }
+  };
+
   const handleDragStart = (event: any, info: any) => {
     setIsDragging(true);
     audio.playSynthesized('click');
@@ -52,18 +77,24 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
   const handleDrag = (event: any, info: any) => {
     // Play a subtle scratch sound occasionally
     if (Math.abs(info.delta.x) > 2 || Math.abs(info.delta.y) > 2) {
-      audio.playSynthesized('card');
+      audio.playSynthesized('card'); // 종이 비벼지는 사운드
     }
     
     // Update finger position relative to the card
     fingerX.set(info.point.x);
     fingerY.set(info.point.y);
+    
+    // 드래그 중이면 squeezing 상태 활성화
+    setIsSqueezing(true);
   };
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    // Reveal only when dragged enough (40% threshold)
-    if (x.get() > 80 || y.get() < -80) {
+    // Reveal when:
+    // 1. Dragged enough (>60px)
+    // 2. Already squeezing from click
+    const dragDistance = Math.abs(x.get()) + Math.abs(y.get());
+    if (dragDistance > 60 || isSqueezing) {
       setIsRevealed(true);
       audio.playSynthesized('win');
       if (onComplete) onComplete();
@@ -71,6 +102,7 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
       // Spring back animation
       x.set(0);
       y.set(0);
+      setIsSqueezing(false);
       audio.playSynthesized('card');
     }
   };
@@ -105,7 +137,8 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
             onDragStart={handleDragStart}
             onDrag={handleDrag}
             onDragEnd={handleDragEnd}
-            className="absolute inset-0 z-20 cursor-grab active:cursor-grabbing"
+            onClick={handleClick}
+            className="absolute inset-0 z-20 cursor-pointer active:cursor-grabbing"
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
           >
             {/* Card Back */}
@@ -181,9 +214,9 @@ export const CardSqueeze: React.FC<CardSqueezeProps> = ({ card, onComplete, clas
       )}
 
       {/* Instruction Text */}
-      {!isRevealed && !isDragging && (
+      {!isRevealed && !isDragging && !isSqueezing && (
         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap text-yellow-400 text-xs font-black uppercase tracking-[0.3em] animate-pulse">
-          👆 드래그하여 카드 쪼이기
+          👆 카드 가장자리 클릭 또는 드래그
         </div>
       )}
     </div>

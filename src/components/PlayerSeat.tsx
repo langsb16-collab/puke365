@@ -93,7 +93,7 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
                     card={card} 
                     hidden={!shouldShowCard}
                     className={`
-                      ${i === 1 ? 'rotate-3' : '-rotate-3'}
+                      ${player.isAI ? (i === 1 ? 'rotate-3' : '-rotate-3') : (i === 0 ? 'rotate-3' : '-rotate-3')}
                       ${!player.isAI && !showCards && !hasSqueezed.has(i) ? 'hover:scale-110 hover:-translate-y-2 transition-transform' : ''}
                     `}
                   />
