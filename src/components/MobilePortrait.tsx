@@ -299,7 +299,10 @@ export const MobilePortrait: React.FC<MobilePortraitProps> = ({
           return (
             <motion.div
               key={i}
-              onClick={() => handleCardClick?.(i)}
+              onClick={() => {
+                handleCardClick?.(i);
+                if (navigator.vibrate) navigator.vibrate(15);
+              }}
               className="cursor-pointer relative"
               animate={{
                 rotate: squeezedCards.has(i) ? (i === 0 ? -6 : 6) : 0,
