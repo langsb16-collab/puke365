@@ -448,21 +448,15 @@ export default function App() {
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center gap-3 bg-white/5 px-4 py-1.5 rounded-2xl border border-white/10 shadow-inner scale-80">
-              <div className="flex flex-col items-end">
-                <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">{t('balance')}</span>
-                <div className="flex items-center gap-2">
-                  <Coins size={12} className="text-yellow-500" />
-                  <span className="text-base font-black text-yellow-500 font-mono tracking-tighter">{gameState.players[0].chips.toLocaleString()}{t('currency')}</span>
+            <div className="flex items-center gap-3 bg-white/5 px-6 py-2 rounded-2xl border border-white/10 shadow-inner min-w-[240px]">
+              <div className="flex items-center gap-2 w-full">
+                <Coins size={16} className="text-yellow-500 flex-shrink-0" />
+                <div className="flex flex-col flex-1">
+                  <span className="text-[9px] text-white/40 uppercase font-black tracking-widest">{t('balance')}</span>
+                  <span className="text-lg font-black text-yellow-500 font-mono tracking-tighter whitespace-nowrap">{gameState.players[0].chips.toLocaleString()}{t('currency')}</span>
                 </div>
+                <button className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center text-black hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20 flex-shrink-0">+</button>
               </div>
-              <button className="w-7 h-7 rounded-lg bg-yellow-500 flex items-center justify-center text-black hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20 text-sm">+</button>
-            </div>
-
-            <div className="flex items-center gap-2 md:gap-3">
-              <button className="p-1.5 md:p-2.5 bg-white/5 text-white/40 rounded-lg md:rounded-xl border border-white/10 hover:bg-white/10 hover:text-white transition-all">
-                <Settings size={16} className="md:w-[18px] md:h-[18px]" />
-              </button>
             </div>
           </div>
         </header>
