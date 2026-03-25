@@ -8,5 +8,4 @@ coverage/
 !.env.example
 .wrangler/
 admin/.env
-admin/dist/
 admin/node_modules/
