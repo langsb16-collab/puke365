@@ -1,6 +1,0 @@
-{
-  "build": {
-    "command": "cd admin && npm ci && npm run build",
-    "output": "admin/dist"
-  }
-}
