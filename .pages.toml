@@ -1,0 +1,1 @@
+{"production_branch":"main","build":{"command":"cd admin && npm ci && npm run build","destination_dir":"admin/dist"}}
