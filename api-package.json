@@ -1,0 +1,21 @@
+{
+  "name": "puke365-admin-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev api/index.ts --local --port 8787",
+    "deploy:api": "wrangler deploy api/index.ts",
+    "db:migrate": "wrangler d1 migrations apply puke365-admin-db",
+    "db:migrate:local": "wrangler d1 migrations apply puke365-admin-db --local"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250705.0",
+    "@types/bcryptjs": "^2.4.6",
+    "wrangler": "^3.78.0"
+  }
+}
